@@ -24,7 +24,7 @@ func sendEmail(toEmail string, subject string, body string) error {
 }
 
 //func sendConfirmationCode(user *User) {
-func sendConfirmationCode(user *User) error {
+func sendGymVisitCheckin(user *User) error {
 	var domainName = envBindURL
 	activationLink := user.EmailUUID
 
