@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/fatih/color"
 	"github.com/subosito/gotenv"
 )
 
@@ -66,4 +67,20 @@ func loadEnv() {
 		log.Fatal("Missing SMTP_PASS value in .env file.")
 	}
 	envSMTPPass = os.Getenv("SMTP_PASS")
+}
+
+func errCheck(taskDescription string, err error) {
+	if err != nil {
+		log.Println("Error w/ " + taskDescription + ": " + err.Error())
+	}
+}
+
+func sendAlert(email bool, subject string, alertText string) {
+	color.Red("High Importance Alert:")
+	log.Println(alertText)
+	//TODO add an email alert for high importance alerts (like network failures)
+	if email {
+		err := sendEmail(envSMTPSender, "Alert:"+subject, "Alert:<br>"+alertText)
+		errCheck("Sending alert email", err)
+	}
 }
