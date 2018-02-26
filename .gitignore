@@ -1,3 +1,4 @@
 .env
 GoToGym
 coverage.*
+vendor
