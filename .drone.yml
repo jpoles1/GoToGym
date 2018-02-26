@@ -14,7 +14,7 @@ pipeline:
       BIND_PORT: "3030"
       BIND_IP: 127.0.0.1
       BIND_URL: localhost
-      MONGO_URI: mongodb://gymdb:gymdb@ds249398.mlab.com:49398/gotogym
+      MONGO_URI: mongodb://mongo
       SMTP_SERVER: smtp.gmail.com
       SMTP_PORT: "465"
       SMTP_SENDER: $$smtp_sender
