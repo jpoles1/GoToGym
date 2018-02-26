@@ -43,7 +43,7 @@
 
 [[constraint]]
   name = "gopkg.in/gomail.v2"
-  version = "v2"
+  branch = "v2"
 
 [prune]
   go-tests = true
