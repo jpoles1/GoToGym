@@ -39,6 +39,10 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		defer r.Body.Close()
 		log.Println(apiData)
 		userID := findUserByAPIKey(apiData.APIKey)
+		if userID == bson.ObjectId("") {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
 		storeGymVisit(GymVisitDocument{
 			userID,
 			apiData.Title,
@@ -59,9 +63,12 @@ func findUserByAPIKey(apiKey string) bson.ObjectId {
 	var userData UserDocument
 	mongoSesh.DB("transitserver").C("users").Find(searchParams).One(&userData)
 	fmt.Println()
+	//TODO what happens when we don't get a response
 	return userData.ID
 }
 func storeGymVisit(doc GymVisitDocument) {
-	sesh := dbLoad()
-	defer sesh.Close()
+	mongoSesh := dbLoad()
+	defer mongoSesh.Close()
+	err := mongoSesh.DB("transitserver").C("gymvisits").Insert(doc)
+	errCheck("Inserting gym visit into DB", err)
 }

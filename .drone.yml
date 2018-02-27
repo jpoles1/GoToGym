@@ -10,7 +10,7 @@ pipeline:
       - go build
       - go test -v -cover
     environment:
-      PRODUCTION: "false"
+      PRODUCTION: false
       BIND_PORT: "3030"
       BIND_IP: 127.0.0.1
       BIND_URL: localhost

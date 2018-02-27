@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"time"
 
-	mgo "gopkg.in/mgo.v2"
+	mgo "github.com/globalsign/mgo"
 )
 
-var mongoConn = dbLoad()
+var mongoConn *mgo.Session
 
 func dbLoad() *mgo.Session {
 	var err error
-	err = nil
 	var mongoDB *mgo.Session
 	attemptNum := 1
 	maxWaitTime := time.Duration(30) * time.Second

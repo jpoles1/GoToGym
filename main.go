@@ -9,8 +9,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func main() {
+func init() {
 	loadEnv()
+	mongoConn = dbLoad()
+}
+func main() {
 	//Add Microservice functions to this list
 	microservices := []func(){
 		func() { webServer() },
