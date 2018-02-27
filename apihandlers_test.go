@@ -30,7 +30,7 @@ func TestGymVisitHandler(t *testing.T) {
 		})
 	})
 	t.Run("Add visit", func(t *testing.T) {
-		request, _ := http.NewRequest("POST", "/api/gymvisit", strings.NewReader("{\"apkikey\": \"secret\", \"title\": \"Test Title\", \"desc\": \"Test Description\", \"startTime\": \"\" , \"endTime\": \"\" }}"))
+		request, _ := http.NewRequest("POST", "/api/gymvisit", strings.NewReader("{\"apikey\": \"secret\", \"title\": \"Test Title\", \"desc\": \"Test Description\", \"startTime\": \"\" , \"endTime\": \"\" }}"))
 		response := httptest.NewRecorder()
 		testRouter.ServeHTTP(response, request)
 		fmt.Println(response)

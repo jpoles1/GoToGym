@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -38,7 +37,7 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		}
 		defer r.Body.Close()
 		log.Println(apiData)
-		userID := findUserByAPIKey(apiData.APIKey)
+		userID := findUserDocumentByAPIKey(apiData.APIKey)
 		if userID == bson.ObjectId("") {
 			w.WriteHeader(http.StatusForbidden)
 			return
@@ -54,21 +53,9 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 	}
 	return apiHandlers
 }
-func findUserByAPIKey(apiKey string) bson.ObjectId {
-	mongoSesh := dbLoad()
-	defer mongoSesh.Close()
-	searchParams := bson.M{
-		"apikey": apiKey,
-	}
-	var userData UserDocument
-	mongoSesh.DB("transitserver").C("users").Find(searchParams).One(&userData)
-	fmt.Println()
-	//TODO what happens when we don't get a response
-	return userData.ID
-}
 func storeGymVisit(doc GymVisitDocument) {
 	mongoSesh := dbLoad()
 	defer mongoSesh.Close()
-	err := mongoSesh.DB("transitserver").C("gymvisits").Insert(doc)
+	err := mongoSesh.DB("gotogym").C("gymvisits").Insert(doc)
 	errCheck("Inserting gym visit into DB", err)
 }
