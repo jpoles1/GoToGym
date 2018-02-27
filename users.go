@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/globalsign/mgo/bson"
 )
@@ -25,7 +25,8 @@ func createUserDocument(userDoc UserDocument) bson.ObjectId {
 	return userDoc.ID
 }
 
-func findUserDocumentByAPIKey(apiKey string) bson.ObjectId {
+func findUserDocumentByAPIKey(apiKey string) (bson.ObjectId, error) {
+	var err error
 	mongoSesh := dbLoad()
 	defer mongoSesh.Close()
 	searchParams := bson.M{
@@ -33,10 +34,10 @@ func findUserDocumentByAPIKey(apiKey string) bson.ObjectId {
 	}
 	var userData UserDocument
 	mongoSesh.DB("gotogym").C("users").Find(searchParams).One(&userData)
-	fmt.Println()
-	//TODO what happens when we don't get a response
-	fmt.Println(apiKey, "UDATA", userData)
-	return userData.ID
+	if userData.ID == bson.ObjectId("") {
+		err = errors.New("Could not fetch a user with this API key")
+	}
+	return userData.ID, err
 }
 
 func deleteUserDocument(userID bson.ObjectId) {

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -33,7 +32,6 @@ func TestGymVisitHandler(t *testing.T) {
 		request, _ := http.NewRequest("POST", "/api/gymvisit", strings.NewReader("{\"apikey\": \"secret\", \"title\": \"Test Title\", \"desc\": \"Test Description\", \"startTime\": \"\" , \"endTime\": \"\" }}"))
 		response := httptest.NewRecorder()
 		testRouter.ServeHTTP(response, request)
-		fmt.Println(response)
 		if response.Code != 200 {
 			t.Error("Failed to submit to gymvisit endpoint. Err code:", response.Code)
 		}

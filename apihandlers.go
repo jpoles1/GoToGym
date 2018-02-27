@@ -37,8 +37,8 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		}
 		defer r.Body.Close()
 		log.Println(apiData)
-		userID := findUserDocumentByAPIKey(apiData.APIKey)
-		if userID == bson.ObjectId("") {
+		userID, err := findUserDocumentByAPIKey(apiData.APIKey)
+		if err != nil {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
