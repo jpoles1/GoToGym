@@ -2,3 +2,4 @@
 GoToGym
 coverage.*
 vendor
+vendor.orig

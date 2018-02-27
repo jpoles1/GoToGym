@@ -13,9 +13,17 @@ type UserDocument struct {
 	HashedPassword []byte        `json:"-" bson:"hashed_password"`
 }
 
-func createUserDocument(userDoc UserDocument) {
+func createUserDocument(userDoc UserDocument) bson.ObjectId {
 	mongoSesh := dbLoad()
 	defer mongoSesh.Close()
 	err := mongoSesh.DB("transitserver").C("users").Insert(userDoc)
 	errCheck("Inserting user into DB", err)
+	return userDoc.ID
+}
+
+func deleteUserDocument(userID bson.ObjectId) {
+	mongoSesh := dbLoad()
+	defer mongoSesh.Close()
+	err := mongoSesh.DB("transitserver").C("users").RemoveId(userID)
+	errCheck("Removing user from DB", err)
 }
