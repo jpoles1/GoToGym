@@ -10,6 +10,7 @@ import (
 
 //GymVisitDocument is a stucture to contain an entry in the GymVisit mgo collection
 type GymVisitDocument struct {
+	ID          bson.ObjectId `bson:"_id,omitempty"`
 	UserID      bson.ObjectId
 	Title       string
 	Description string
@@ -32,30 +33,34 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		decoder := json.NewDecoder(r.Body)
 		var apiData apiStruct
 		err := decoder.Decode(&apiData)
-		if err != nil {
-			panic(err)
-		}
+		errCheck("Decoding gymvisit API request", err)
 		defer r.Body.Close()
 		log.Println(apiData)
-		userID, err := findUserDocumentByAPIKey(apiData.APIKey)
+		userData, err := findUserDocumentByAPIKey(apiData.APIKey)
 		if err != nil {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
-		storeGymVisit(GymVisitDocument{
-			userID,
+		visitData := GymVisitDocument{
+			bson.NewObjectId(),
+			(*userData).ID,
 			apiData.Title,
 			apiData.Description,
 			apiData.StartTime,
 			apiData.EndTime,
-		})
+		}
+		err = storeGymVisit(&visitData)
+		errCheck("Decoding gymvisit API request", err)
+		err = sendGymVisitCheckin(visitData, userData)
+		errCheck("Sending gymvisit email", err)
 		w.Write([]byte("Gym Visit Entry Received"))
 	}
 	return apiHandlers
 }
-func storeGymVisit(doc GymVisitDocument) {
+func storeGymVisit(doc *GymVisitDocument) error {
 	mongoSesh := dbLoad()
 	defer mongoSesh.Close()
 	err := mongoSesh.DB("gotogym").C("gymvisits").Insert(doc)
 	errCheck("Inserting gym visit into DB", err)
+	return err
 }

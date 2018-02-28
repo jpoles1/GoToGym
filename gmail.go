@@ -1,7 +1,8 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
+	"html/template"
 
 	gomail "gopkg.in/gomail.v2"
 )
@@ -24,11 +25,19 @@ func sendEmail(toEmail string, subject string, body string) error {
 }
 
 //func sendConfirmationCode(user *User) {
-func sendGymVisitCheckin(user *UserDocument) error {
+func sendGymVisitCheckin(visitData GymVisitDocument, userData *UserDocument) error {
 	var domainName = envBindURL
-	activationLink := user.APIKey
+	verificationLink := domainName + "/api/verifyvisit/" + userData.APIKey
 
-	link := domainName + "/emailconfirm/" + activationLink
-	message := fmt.Sprintf("Hello %s! <br><br> Thanks for signing up for a Transit Sign Account! <br><br> To activate your account please click the link below: <br><br> <a href=\"%s\">%s</a> <br> <i>If the link does not open automatically please copy and paste it into your browser of choice</i> <br> <br> Thanks! <br> -The Transit Sign Team", user.FirstName, link, link)
-	return sendEmail(user.Email, "Transit Server Confirmation!", message)
+	tmpl := template.New("home")
+	tmpl, _ = template.ParseFiles("templates/visitcheckin.gohtml")
+	var tplString bytes.Buffer
+	err := tmpl.Execute(&tplString, map[string]string{
+		"FirstName":        userData.FirstName,
+		"StartTime":        visitData.StartTime,
+		"EndTime":          visitData.EndTime,
+		"VerificationLink": verificationLink,
+	})
+	errCheck("Rendering email template", err)
+	return sendEmail(userData.Email, "GoToGym - Gym Check-In!", tplString.String())
 }

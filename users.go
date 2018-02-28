@@ -25,7 +25,7 @@ func createUserDocument(userDoc UserDocument) bson.ObjectId {
 	return userDoc.ID
 }
 
-func findUserDocumentByAPIKey(apiKey string) (bson.ObjectId, error) {
+func findUserDocumentByAPIKey(apiKey string) (*UserDocument, error) {
 	var err error
 	mongoSesh := dbLoad()
 	defer mongoSesh.Close()
@@ -37,7 +37,7 @@ func findUserDocumentByAPIKey(apiKey string) (bson.ObjectId, error) {
 	if userData.ID == bson.ObjectId("") {
 		err = errors.New("Could not fetch a user with this API key")
 	}
-	return userData.ID, err
+	return &userData, err
 }
 
 func deleteUserDocument(userID bson.ObjectId) {
