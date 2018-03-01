@@ -95,13 +95,13 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 			apiData.FirstName, apiData.LastName,
 			false, []byte{},
 		}
-		createUserDocument(newUserData, apiData.Password)
 		err = sendRegistrationEmail(&newUserData)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Failed to send email: " + err.Error()))
 			return
 		}
+		createUserDocument(newUserData, apiData.Password)
 		w.Write([]byte("New User Entry Received"))
 	}
 	return apiHandlers
