@@ -18,6 +18,7 @@ func initRouter() *mux.Router {
 	//Define Routes
 	router.HandleFunc("/", homePageHandler)
 	router.HandleFunc("/api/gymvisit", apiHandlers["gymvisit"]).Methods("POST")
+	router.HandleFunc("/api/newuser", apiHandlers["newuser"]).Methods("POST")
 	//Serve static files stored in html/static
 	router.PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(http.Dir("static"))))
 	return router
