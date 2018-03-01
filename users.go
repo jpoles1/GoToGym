@@ -63,3 +63,9 @@ func deleteUserDocument(userID bson.ObjectId) {
 	err := mongoSesh.DB("gotogym").C("users").RemoveId(userID)
 	errCheck("Removing user from DB", err)
 }
+func deleteAllUserDocuments() {
+	mongoSesh := dbLoad()
+	defer mongoSesh.Close()
+	_, err := mongoSesh.DB("gotogym").C("users").RemoveAll(bson.M{})
+	errCheck("Removing all users from DB", err)
+}

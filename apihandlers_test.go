@@ -40,3 +40,17 @@ func TestGymVisitHandler(t *testing.T) {
 		deleteUserDocument(userID)
 	})
 }
+
+func TestUserRegistration(t *testing.T) {
+	t.Run("Create User Via API", func(t *testing.T) {
+		request, _ := http.NewRequest("POST", "/api/newuser", strings.NewReader("{\"email\": \"jpdev.noreply@gmail.com\", \"firstname\": \"Jordan\", \"lastname\": \"Poles\"}"))
+		response := httptest.NewRecorder()
+		testRouter.ServeHTTP(response, request)
+		if response.Code != 200 {
+			t.Error("Failed to submit to newuser endpoint. Err code:", response.Code, response.Body)
+		}
+	})
+	t.Run("Delete All Users", func(t *testing.T) {
+		deleteAllUserDocuments()
+	})
+}

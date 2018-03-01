@@ -66,8 +66,8 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 	apiHandlers["newuser"] = func(w http.ResponseWriter, r *http.Request) {
 		type apiStruct struct {
 			Email     string `json:"email"`
-			FirstName string `json:"first_name"`
-			LastName  string `json:"last_name"`
+			FirstName string `json:"firstname"`
+			LastName  string `json:"lastname"`
 			Password  string `json:"password"`
 		}
 		decoder := json.NewDecoder(r.Body)
@@ -76,6 +76,11 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		errCheck("Decoding newuser API request", err)
 		defer r.Body.Close()
 		log.Println(apiData)
+		if apiData.Email == "" || apiData.FirstName == "" || apiData.LastName == "" {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("Need to fill all fields (email, firstname, lastname)"))
+			return
+		}
 		userCount := findUserDocumentByEmail(apiData.Email)
 		if userCount > 0 {
 			w.WriteHeader(http.StatusBadRequest)
@@ -91,7 +96,12 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 			false, []byte{},
 		}
 		createUserDocument(newUserData, apiData.Password)
-		sendRegistrationEmail(&newUserData)
+		err = sendRegistrationEmail(&newUserData)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to send email: " + err.Error()))
+			return
+		}
 		w.Write([]byte("New User Entry Received"))
 	}
 	return apiHandlers
