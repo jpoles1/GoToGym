@@ -25,11 +25,26 @@ func sendEmail(toEmail string, subject string, body string) error {
 }
 
 //func sendConfirmationCode(user *User) {
-func sendGymVisitCheckin(visitData GymVisitDocument, userData *UserDocument) error {
+func sendRegistrationEmail(userData *UserDocument) error {
+	var domainName = envBindURL
+	verificationLink := domainName + "/api/verifyemail/" + userData.APIKey
+
+	tmpl := template.New("home")
+	tmpl, _ = template.ParseFiles("templates/emailregistration.gohtml")
+	var tplString bytes.Buffer
+	err := tmpl.Execute(&tplString, map[string]string{
+		"FirstName":        userData.FirstName,
+		"APIKey":           userData.APIKey,
+		"VerificationLink": verificationLink,
+	})
+	errCheck("Rendering email template", err)
+	return sendEmail(userData.Email, "GoToGym - Registration", tplString.String())
+}
+func sendGymVisitCheckinEmail(visitData GymVisitDocument, userData *UserDocument) error {
 	var domainName = envBindURL
 	verificationLink := domainName + "/api/verifyvisit/" + userData.APIKey
 
-	tmpl := template.New("home")
+	tmpl := template.New("visitcheckin")
 	tmpl, _ = template.ParseFiles("templates/visitcheckin.gohtml")
 	var tplString bytes.Buffer
 	err := tmpl.Execute(&tplString, map[string]string{

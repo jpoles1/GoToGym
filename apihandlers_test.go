@@ -26,7 +26,7 @@ func TestGymVisitHandler(t *testing.T) {
 			"jpdev.noreply@gmail.com",
 			"Jordan", "Poles",
 			false, []byte{},
-		})
+		}, "password")
 	})
 	t.Run("Add visit", func(t *testing.T) {
 		request, _ := http.NewRequest("POST", "/api/gymvisit", strings.NewReader("{\"apikey\": \"secret\", \"title\": \"Test Title\", \"desc\": \"Test Description\", \"startTime\": \"\" , \"endTime\": \"\" }}"))

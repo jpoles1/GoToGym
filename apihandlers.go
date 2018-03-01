@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/globalsign/mgo/bson"
+	uuid "github.com/satori/go.uuid"
 )
 
 //GymVisitDocument is a stucture to contain an entry in the GymVisit mgo collection
@@ -36,9 +37,16 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		errCheck("Decoding gymvisit API request", err)
 		defer r.Body.Close()
 		log.Println(apiData)
+		//Check that all required fields are filled
+		if apiData.APIKey == "" {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("Need to fill all fields (apikey)"))
+			return
+		}
 		userData, err := findUserDocumentByAPIKey(apiData.APIKey)
 		if err != nil {
 			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("API key not found"))
 			return
 		}
 		visitData := GymVisitDocument{
@@ -51,9 +59,40 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		}
 		err = storeGymVisit(&visitData)
 		errCheck("Decoding gymvisit API request", err)
-		err = sendGymVisitCheckin(visitData, userData)
+		err = sendGymVisitCheckinEmail(visitData, userData)
 		errCheck("Sending gymvisit email", err)
 		w.Write([]byte("Gym Visit Entry Received"))
+	}
+	apiHandlers["newuser"] = func(w http.ResponseWriter, r *http.Request) {
+		type apiStruct struct {
+			Email     string `json:"email"`
+			FirstName string `json:"first_name"`
+			LastName  string `json:"last_name"`
+			Password  string `json:"password"`
+		}
+		decoder := json.NewDecoder(r.Body)
+		var apiData apiStruct
+		err := decoder.Decode(&apiData)
+		errCheck("Decoding newuser API request", err)
+		defer r.Body.Close()
+		log.Println(apiData)
+		userCount := findUserDocumentByEmail(apiData.Email)
+		if userCount > 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Email already in use"))
+			return
+		}
+		apiKey := uuid.NewV4().String()
+		newUserData := UserDocument{
+			bson.NewObjectId(),
+			apiKey,
+			apiData.Email,
+			apiData.FirstName, apiData.LastName,
+			false, []byte{},
+		}
+		createUserDocument(newUserData, apiData.Password)
+		sendRegistrationEmail(&newUserData)
+		w.Write([]byte("New User Entry Received"))
 	}
 	return apiHandlers
 }

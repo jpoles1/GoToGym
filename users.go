@@ -4,25 +4,42 @@ import (
 	"errors"
 
 	"github.com/globalsign/mgo/bson"
+	"golang.org/x/crypto/bcrypt"
 )
 
 //UserDocument is a stucture to contain an entry in the users mgo collection
 type UserDocument struct {
 	ID             bson.ObjectId `bson:"_id,omitempty"`
-	APIKey         string        `bson:"apikey"`
+	APIKey         string        `json:"apikey" bson:"apikey"`
 	Email          string        `json:"email" bson:"email"`
 	FirstName      string        `json:"first_name" bson:"first_name"`
 	LastName       string        `json:"last_name" bson:"last_name"`
 	EmailConfirmed bool          `json:"-" bson:"email_confirmed"`
-	HashedPassword []byte        `json:"-" bson:"hashed_password"`
+	PasswordHash   []byte        `json:"-" bson:"hashed_password"`
 }
 
-func createUserDocument(userDoc UserDocument) bson.ObjectId {
+func createUserDocument(userDoc UserDocument, passString string) bson.ObjectId {
 	mongoSesh := dbLoad()
 	defer mongoSesh.Close()
-	err := mongoSesh.DB("gotogym").C("users").Insert(userDoc)
+	// Hashing the password with the default cost of 10
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(passString), bcrypt.DefaultCost)
+	errCheck("Encoding password to hash", err)
+	userDoc.PasswordHash = passwordHash
+	err = mongoSesh.DB("gotogym").C("users").Insert(userDoc)
 	errCheck("Inserting user into DB", err)
 	return userDoc.ID
+}
+
+func findUserDocumentByEmail(email string) int {
+	var err error
+	mongoSesh := dbLoad()
+	defer mongoSesh.Close()
+	searchParams := bson.M{
+		"email": email,
+	}
+	userCount, err := mongoSesh.DB("gotogym").C("users").Find(searchParams).Count()
+	errCheck("Finding User by Email", err)
+	return userCount
 }
 
 func findUserDocumentByAPIKey(apiKey string) (*UserDocument, error) {
