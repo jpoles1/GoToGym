@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -13,19 +14,19 @@ var testRouter = initRouter()
 
 func TestGymVisitHandler(t *testing.T) {
 	userID := bson.NewObjectId()
-	userSecret := "secret"
+	apiKey := "secret"
 	gymVisitID := bson.NewObjectId()
 	t.Run("Create User by URL", func(t *testing.T) {
 		createUserDocument(UserDocument{
 			userID,
-			userSecret,
+			apiKey,
 			"jpdev.noreply@gmail.com",
 			"Jordan", "Poles",
 			false, []byte{},
 		}, "password")
 	})
 	t.Run("Create visit by URL", func(t *testing.T) {
-		request, _ := http.NewRequest("POST", "/api/gymvisit", strings.NewReader("{\"apikey\": \"secret\", \"title\": \"URL Test\", \"desc\": \"Test Description\", \"startTime\": \"\" , \"endTime\": \"\" }}"))
+		request, _ := http.NewRequest("POST", "/api/gymvisit", strings.NewReader("{\"apikey\": \"secret\", \"title\": \"URL Test\", \"desc\": \"Test Description\", \"startTime\": \"March 2, 2018 at 10:00PM\" , \"endTime\": \"March 2, 2018 at 10:08PM\" }}"))
 		response := httptest.NewRecorder()
 		testRouter.ServeHTTP(response, request)
 		if response.Code != 200 {
@@ -43,12 +44,21 @@ func TestGymVisitHandler(t *testing.T) {
 		})
 	})
 	t.Run("Update visit attendance by URL", func(t *testing.T) {
-		request, _ := http.NewRequest("GET", "/api/verifyvisit/"+gymVisitID.Hex()+"/"+userSecret+"/yes", nil)
+		request, _ := http.NewRequest("GET", "/api/verifyvisit/"+gymVisitID.Hex()+"/"+apiKey+"/yes", nil)
 		response := httptest.NewRecorder()
 		testRouter.ServeHTTP(response, request)
 		if response.Code != 200 {
 			t.Error("Failed to submit to verifyvisit endpoint. Err code:", response.Code, response.Body)
 		}
+	})
+	t.Run("Fetch visit list", func(t *testing.T) {
+		request, _ := http.NewRequest("GET", "/api/visitlist/"+apiKey, nil)
+		response := httptest.NewRecorder()
+		testRouter.ServeHTTP(response, request)
+		if response.Code != 200 {
+			t.Error("Failed to fetch from visitlist endpoint. Err code:", response.Code, response.Body)
+		}
+		fmt.Println(response.Body)
 	})
 	t.Run("Delete User", func(t *testing.T) {
 		deleteUserDocument(userID)

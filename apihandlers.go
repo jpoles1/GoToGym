@@ -14,6 +14,22 @@ var apiHandlers = apiHandlerSetup()
 
 func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 	var apiHandlers = map[string]func(http.ResponseWriter, *http.Request){}
+	//Use this endpoint to get a list of gym visits from a given user's account
+	apiHandlers["visitlist"] = func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		apiKey := vars["apiKey"]
+		userDoc, err := findUserDocumentByAPIKey(apiKey)
+		if err != nil {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("API key not found"))
+			return
+		}
+		visitDocs := findGymVisitDocumentsByUserID(userDoc.ID)
+		jsonData, err := json.Marshal(visitDocs)
+		errCheck("Endoding visit list JSON", err)
+		w.Write(jsonData)
+	}
+	//Use this endpoint to add a new gym visit to a given user's account
 	apiHandlers["gymvisit"] = func(w http.ResponseWriter, r *http.Request) {
 		type apiStruct struct {
 			APIKey      string `json:"apikey"`
@@ -55,6 +71,7 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		errCheck("Sending gymvisit email", err)
 		w.Write([]byte("Gym Visit Entry Received"))
 	}
+	//Use this endpoint to add a new user account
 	apiHandlers["newuser"] = func(w http.ResponseWriter, r *http.Request) {
 		type apiStruct struct {
 			Email     string `json:"email"`
@@ -96,6 +113,7 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		createUserDocument(newUserData, apiData.Password)
 		w.Write([]byte("New User Entry Received"))
 	}
+	//Use this endpoint to update a gym visit with user attendance
 	apiHandlers["verifyvisit"] = func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		documentID := vars["documentID"]
@@ -115,9 +133,9 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		}
 		if gymVisitData.UserID == userData.ID {
 			if visitResponse == "yes" {
-				gymVisitData.Attended = AttendanceAttended
+				gymVisitData.Attendance = AttendanceAttended
 			} else if visitResponse == "no" {
-				gymVisitData.Attended = AttendanceMissed
+				gymVisitData.Attendance = AttendanceMissed
 			} else {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte("Invalid response"))

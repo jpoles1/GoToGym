@@ -20,13 +20,13 @@ const (
 
 //GymVisitDocument is a stucture to contain an entry in the GymVisit mgo collection
 type GymVisitDocument struct {
-	ID          bson.ObjectId `bson:"_id,omitempty"`
-	UserID      bson.ObjectId
-	Title       string
-	Description string
-	StartTime   string
-	EndTime     string
-	Attended    Attendance
+	ID          bson.ObjectId `json:"id" bson:"_id,omitempty"`
+	UserID      bson.ObjectId `json:"-" bson:"userid"`
+	Title       string        `json:"title"`
+	Description string        `json:"desc"`
+	StartTime   string        `json:"startTime"`
+	EndTime     string        `json:"endTime"`
+	Attendance  Attendance    `json:"attendance"`
 }
 
 func createGymVisitDocument(doc *GymVisitDocument) error {
@@ -36,7 +36,6 @@ func createGymVisitDocument(doc *GymVisitDocument) error {
 	errCheck("Inserting gym visit into DB", err)
 	return err
 }
-
 func findGymVisitDocumentByID(documentID bson.ObjectId) (*GymVisitDocument, error) {
 	var err error
 	mongoSesh := dbLoad()
@@ -51,13 +50,22 @@ func findGymVisitDocumentByID(documentID bson.ObjectId) (*GymVisitDocument, erro
 	}
 	return &gymVisitDocument, err
 }
+func findGymVisitDocumentsByUserID(userID bson.ObjectId) *[]GymVisitDocument {
+	mongoSesh := dbLoad()
+	defer mongoSesh.Close()
+	searchParams := bson.M{
+		"userid": userID,
+	}
+	var gymVisitDocuments []GymVisitDocument
+	mongoSesh.DB("gotogym").C("gymvisits").Find(searchParams).All(&gymVisitDocuments)
+	return &gymVisitDocuments
+}
 func updateGymVisitDocumentByID(doc *GymVisitDocument) error {
 	mongoSesh := dbLoad()
 	defer mongoSesh.Close()
 	_, err := mongoSesh.DB("gotogym").C("gymvisits").Upsert(bson.M{"_id": doc.ID}, doc)
 	return err
 }
-
 func deleteAllGymVisitDocuments() {
 	mongoSesh := dbLoad()
 	defer mongoSesh.Close()
