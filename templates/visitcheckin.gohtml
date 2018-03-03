@@ -2,6 +2,8 @@ Hello {{.FirstName}},
 <br>
 Looks like you were scheduled to go to the gym today! Did you send up going between:
 <br>
+<hr>
+<br>
 <div style="font-size: 24px; text-align: center; font-weight: bold;">
   {{.StartTime}}
   <br>
@@ -10,6 +12,10 @@ Looks like you were scheduled to go to the gym today! Did you send up going betw
   {{.EndTime}}
 </div>
 <br>
-If so click the link below to confirm that you went to the gym today so it can be entered into your log!
+<hr>
 <br>
-<a href="{{.VerificationLink}}">{{.VerificationLink}}</a>
+Click below so it can be entered into your log:
+<br><br>
+<div style="font-size: 16px">
+  <a href="{{.VerificationLink}}/yes">Yes, I was there!</a> | <a href="{{.VerificationLink}}/no">Nope, I'll go soon!</a>
+</div>

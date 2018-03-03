@@ -18,7 +18,7 @@ type UserDocument struct {
 	PasswordHash   []byte        `json:"-" bson:"hashed_password"`
 }
 
-func createUserDocument(userDoc UserDocument, passString string) bson.ObjectId {
+func createUserDocument(userDoc UserDocument, passString string) {
 	mongoSesh := dbLoad()
 	defer mongoSesh.Close()
 	// Hashing the password with the default cost of 10
@@ -27,7 +27,6 @@ func createUserDocument(userDoc UserDocument, passString string) bson.ObjectId {
 	userDoc.PasswordHash = passwordHash
 	err = mongoSesh.DB("gotogym").C("users").Insert(userDoc)
 	errCheck("Inserting user into DB", err)
-	return userDoc.ID
 }
 
 func findUserDocumentByEmail(email string) int {

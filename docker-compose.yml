@@ -17,7 +17,7 @@ services:
   mongo:
     image: mongo
     volumes:
-      - mdata:/data/db
+      - ./mdata:/data/db
     restart: unless-stopped
 volumes:
   mdata:

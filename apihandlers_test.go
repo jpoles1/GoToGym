@@ -9,31 +9,45 @@ import (
 	"github.com/globalsign/mgo/bson"
 )
 
-/*func testRouter() *mux.Router {
-	router := mux.NewRouter()
-	router.HandleFunc("/", stationList)
-	return router
-}*/
-
 var testRouter = initRouter()
 
 func TestGymVisitHandler(t *testing.T) {
-	var userID bson.ObjectId
-	t.Run("Create User", func(t *testing.T) {
-		userID = createUserDocument(UserDocument{
-			bson.NewObjectId(),
-			"secret",
+	userID := bson.NewObjectId()
+	userSecret := "secret"
+	gymVisitID := bson.NewObjectId()
+	t.Run("Create User by URL", func(t *testing.T) {
+		createUserDocument(UserDocument{
+			userID,
+			userSecret,
 			"jpdev.noreply@gmail.com",
 			"Jordan", "Poles",
 			false, []byte{},
 		}, "password")
 	})
-	t.Run("Add visit", func(t *testing.T) {
-		request, _ := http.NewRequest("POST", "/api/gymvisit", strings.NewReader("{\"apikey\": \"secret\", \"title\": \"Test Title\", \"desc\": \"Test Description\", \"startTime\": \"\" , \"endTime\": \"\" }}"))
+	t.Run("Create visit by URL", func(t *testing.T) {
+		request, _ := http.NewRequest("POST", "/api/gymvisit", strings.NewReader("{\"apikey\": \"secret\", \"title\": \"URL Test\", \"desc\": \"Test Description\", \"startTime\": \"\" , \"endTime\": \"\" }}"))
 		response := httptest.NewRecorder()
 		testRouter.ServeHTTP(response, request)
 		if response.Code != 200 {
 			t.Error("Failed to submit to gymvisit endpoint. Err code:", response.Code)
+		}
+	})
+	t.Run("Create visit", func(t *testing.T) {
+		createGymVisitDocument(&GymVisitDocument{
+			gymVisitID,
+			userID,
+			"Function Test",
+			"Description Test",
+			"", "",
+			AttendanceUnset,
+		})
+	})
+	t.Run("Update visit attendance by URL", func(t *testing.T) {
+		request, _ := http.NewRequest("GET", "/api/verifyvisit/"+gymVisitID.Hex()+"/"+userSecret+"/yes", nil)
+		response := httptest.NewRecorder()
+		testRouter.ServeHTTP(response, request)
+		if response.Code != 200 {
+			t.Error("Failed to submit to verifyvisit endpoint. Err code:", response.Code, response.Body)
 		}
 	})
 	t.Run("Delete User", func(t *testing.T) {
@@ -52,5 +66,8 @@ func TestUserRegistration(t *testing.T) {
 	})
 	t.Run("Delete All Users", func(t *testing.T) {
 		deleteAllUserDocuments()
+	})
+	t.Run("Delete All GymVisits", func(t *testing.T) {
+		//deleteAllGymVisitDocuments()
 	})
 }

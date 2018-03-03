@@ -1,0 +1,2 @@
+curl -d '{"email":"jpoles1@gmail.com", "firstname":"Jordan", "lastname": "Poles"}' -H "Content-Type: application/json" -X POST gym.jpoles1.com/api/newuser
+curl -d '{"apikey":"c3ee2a71-c5fd-4583-841a-1ae6c2886fee", "title":"event title", "desc": "description", "startTime": "March 2, 2018 at 10:00PM", "endTime": "March 2, 2018 at 10:08PM"}' -H "Content-Type: application/json" -X POST gym.jpoles1.com/api/gymvisit

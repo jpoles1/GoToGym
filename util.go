@@ -61,6 +61,15 @@ func loadEnv() {
 	envSMTPPass = os.Getenv("SMTP_PASS")
 }
 
+/*func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}*/
+
 func errCheck(taskDescription string, err error) {
 	if err != nil {
 		log.Println("Error w/ " + taskDescription + ": " + err.Error())
