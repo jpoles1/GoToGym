@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/globalsign/mgo/bson"
@@ -43,7 +42,6 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		err := decoder.Decode(&apiData)
 		errCheck("Decoding gymvisit API request", err)
 		defer r.Body.Close()
-		log.Println(apiData)
 		//Check that all required fields are filled
 		if apiData.APIKey == "" {
 			w.WriteHeader(http.StatusBadRequest)
@@ -84,7 +82,6 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		err := decoder.Decode(&apiData)
 		errCheck("Decoding newuser API request", err)
 		defer r.Body.Close()
-		log.Println(apiData)
 		if apiData.Email == "" || apiData.FirstName == "" || apiData.LastName == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Need to fill all fields (email, firstname, lastname)"))
