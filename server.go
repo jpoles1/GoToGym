@@ -17,6 +17,7 @@ func initRouter() *mux.Router {
 	router := mux.NewRouter()
 	//Define Routes
 	router.HandleFunc("/", homePageHandler)
+	router.HandleFunc("/visitlist/{apiKey}", visitListHandler)
 	router.HandleFunc("/api/visitlist/{apiKey}", apiHandlers["visitlist"]).Methods("GET")
 	router.HandleFunc("/api/gymvisit", apiHandlers["gymvisit"]).Methods("POST")
 	router.HandleFunc("/api/newuser", apiHandlers["newuser"]).Methods("POST")

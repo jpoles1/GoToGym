@@ -1,0 +1,101 @@
+<html>
+
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/c3@0.4.21/c3.min.css">
+    <style>
+        body{
+            font-family: 'Roboto', sans-serif;
+        }
+        #plot-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-column-gap: 1em;
+            grid-row-gap: 1em;
+        }
+
+        .plot-container {
+            border: 1px solid #e2e2e2;
+            border-radius: 3px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        .plot-title{
+            padding: 5px;
+            border-bottom: 1px solid #d7d7d7; 
+            font-weight: bold;
+        }
+
+        #attendance-pct-gauge {
+            grid-column: span 3;
+        }
+
+        #attendance-plot {
+            grid-column: span 6;
+            grid-row: span 2;
+        }
+
+        #monthly-missed-gauge {
+            grid-column: span 3;
+        }
+    </style>
+    <script src="//cdn.jsdelivr.net/d3js/3.5.17/d3.min.js" charset="utf-8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/c3@0.4.21/c3.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div id="container">
+        <div id="plot-container">
+            <div id="attendance-pct-gauge" class="plot-container">
+                <div class="plot-title">
+                    Attendance Frequency 
+                </div>
+                <div class="plot-box">
+
+                </div>
+            </div>
+            <div id="attendance-plot" class="plot-container">
+                Attendance Plot
+            </div>
+            <div id="monthly-missed-gauge" class="plot-container">
+                Monthly Missed
+            </div>
+            <div id="attendance-pct-gauge" class="plot-container">
+                DoW Pie Chart
+            </div>
+            <div id="attendance-pct-gauge" class="plot-container">
+                Attendance Pct Gauge
+            </div>
+        </div>
+    </div>
+    <script src="/static/charts.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        var now = new Date();
+        var thisMonth = months[now.getMonth()];
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                visitData = JSON.parse(this.responseText)
+                totalCount = visitData.length
+                attendedCount = 0
+                missedThisMonth = 0
+                console.log(visitData)
+                for (visitIndex in visitData) {
+                    visit = visitData[visitIndex]
+                    if(visit.attendance == 1){
+                        attendedCount++
+                    }
+                }
+                console.log(attendedCount, totalCount)
+                generateGauge("#attendance-pct-gauge .plot-box", 100*attendedCount/totalCount);
+                document.getElementById("attendance-plot").innerHTML = this.responseText;
+            }
+        };
+        xhttp.open("GET", "/api/visitlist/secret", true);
+        xhttp.send();
+    </script>
+</body>
+
+</html>
