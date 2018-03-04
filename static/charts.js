@@ -18,3 +18,26 @@ function generateGauge(divID, gaugeValue){
         }
     });
 }
+function generateAttendancePlot(divID, plotData){
+    c3.generate({
+        bindto: divID,
+        data: {
+            x: 'Time',
+            //March 2, 2018 at 10:08PM
+            xFormat: '%B %-d, %Y at %-I:%M%p', // 'xFormat' can be used as custom format of 'x'
+            columns: plotData
+        },
+        axis: {
+            x: {
+                type: 'timeseries',
+                tick: {
+                    rotate: 15,
+                    format: "%H:%M:%S %Y-%m-%d"
+                }
+            }
+        },
+        zoom: {
+            enabled: true
+        }
+    });
+}

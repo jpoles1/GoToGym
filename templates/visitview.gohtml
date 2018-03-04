@@ -56,7 +56,12 @@
                 </div>
             </div>
             <div id="attendance-plot" class="plot-container">
-                Attendance Plot
+                <div class="plot-title">
+                    Attendance Timeseries
+                </div>
+                <div class="plot-box">
+
+                </div>
             </div>
             <div id="monthly-missed-gauge" class="plot-container">
                 Monthly Missed
@@ -81,19 +86,23 @@
                 totalCount = visitData.length
                 attendedCount = 0
                 missedThisMonth = 0
+                attendancePlotTimepoints = ["Time"]
+                attendancePlotCounts = ["Attendance"] 
                 console.log(visitData)
                 for (visitIndex in visitData) {
                     visit = visitData[visitIndex]
                     if(visit.attendance == 1){
                         attendedCount++
                     }
+                    attendancePlotTimepoints.push(visit.endTime)
+                    attendancePlotCounts.push(attendedCount)
                 }
-                console.log(attendedCount, totalCount)
                 generateGauge("#attendance-pct-gauge .plot-box", 100*attendedCount/totalCount);
-                document.getElementById("attendance-plot").innerHTML = this.responseText;
+                generateAttendancePlot("#attendance-plot .plot-box", [attendancePlotTimepoints, attendancePlotCounts])
+                document.getElementById("monthly-missed-gauge").innerHTML = this.responseText;
             }
         };
-        xhttp.open("GET", "/api/visitlist/secret", true);
+        xhttp.open("GET", "/api/visitlist/{{.APIKey}}", true);
         xhttp.send();
     </script>
 </body>

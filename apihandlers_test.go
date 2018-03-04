@@ -39,7 +39,7 @@ func TestGymVisitHandler(t *testing.T) {
 			userID,
 			"Function Test",
 			"Description Test",
-			"", "",
+			"March 3, 2018 at 09:30AM", "March 3, 2018 at 09:50AM",
 			AttendanceUnset,
 		})
 	})
