@@ -52,5 +52,5 @@ func sendGymVisitCheckinEmail(visitData GymVisitDocument, userData *UserDocument
 		"VerificationLink": verificationLink,
 	})
 	errCheck("Rendering email template", err)
-	return sendEmail(userData.Email, "GoToGym - Gym Check-In!", tplString.String())
+	return sendEmail(userData.Email, "GoToGym - Gym Check-In - "+visitData.EndTime, tplString.String())
 }
