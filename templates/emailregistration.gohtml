@@ -7,5 +7,15 @@ Looks like you've registered for an account with GoToGym!
 <ol>
   <li>Create an account with IFTTT</li>
   <li>Create a Google Calendar applet</li>
-  <li>Register with your API key: {{.APIKey}}</li>
+  <li>Select the trigger: "any event ends"</li>
+  <li>Select a calendar which will hold your gym event</li>
+  <li>Select a webhook action to "make a web request"</li>
+  <li>Use the URL: http://gym.jpoles1.com/api/gymvisit</li>
+  <li>Select the "POST" method.</li>
+  <li>Select the "application/json" content type</li>
+  <li>
+    Set the Body to:
+    <br>
+    {"apikey":"{{.APIKey}}", "title": "&#123;&#123;Title}}", "desc": "&#123;&#123;Description}}", "startTime": "&#123;&#123;StartTime}}", "endTime": "&#123;&#123;EndTime}}"}
+  </li>
 </ol>
