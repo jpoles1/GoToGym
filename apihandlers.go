@@ -144,7 +144,11 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 				w.Write([]byte("Failed to update DB entry: " + err.Error()))
 				return
 			}
-			w.Write([]byte("Successfully updated visit attendance!"))
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Write([]byte(`
+				<meta http-equiv="refresh" content="1.5;url=/visitlist/` + apiKey + `"/>
+				Successfully updated visit attendance! <a href="/visitlist/` + apiKey + `">Redirecting...</a>
+			`))
 		}
 	}
 	return apiHandlers
