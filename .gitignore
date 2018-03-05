@@ -3,3 +3,4 @@ GoToGym
 coverage.*
 vendor
 vendor.orig
+.vscode/settings.json
