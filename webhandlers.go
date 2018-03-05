@@ -10,12 +10,7 @@ import (
 func homePageHandler(w http.ResponseWriter, r *http.Request) {
 	t := template.New("home")
 	t, _ = template.ParseFiles("templates/index.gohtml")
-	homePageData := struct {
-		Name string
-	}{
-		"JP",
-	}
-	t.Execute(w, homePageData)
+	t.Execute(w, nil)
 }
 func visitListHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

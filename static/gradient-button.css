@@ -1,0 +1,43 @@
+.gradient-button-link {
+    text-decoration: none;
+}
+.gradient-button {
+    position: relative;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: #003a92;
+    padding: 1em 2em;
+    border: none;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    outline: none;
+    overflow: hidden;
+    border-radius: 100px;
+}
+
+.gradient-button span {
+    position: relative;
+    pointer-events: none;
+}
+
+.gradient-button::before {
+    --size: 0;
+    --growth-pct: -55%;
+    content: '';
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: var(--size);
+    height: var(--size);
+    background: radial-gradient(circle closest-side, #006992, transparent);
+    -webkit-transform: translate(var(--growth-pct), var(--growth-pct));
+    transform: translate(var(--growth-pct), var(--growth-pct));
+    -webkit-transition: width .2s ease, height .2s ease;
+    transition: width .2s ease, height .2s ease;
+}
+
+.gradient-button:hover::before {
+    --size: 400px;
+}
