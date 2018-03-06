@@ -32,18 +32,20 @@
 			var email = document.getElementById("login-email").value
 			var password = document.getElementById("login-password").value
 			var xhttp = new XMLHttpRequest();
-			xhttp.onreadystatechange = function () {
-				if (this.readyState == 4) {
-					if (this.status == 200) {
-						window.location = this.responseText
-					} else {
-						document.getElementById("login-alert").style.visibility = "visible"
-					}
+			xhttp.onload = function () {
+				if (this.responseText != "") {
+					window.location = "/visitlist/" + this.responseText
+				} else {
+					document.getElementById("login-alert").innerHTML = "Could not login with the given credentials!"
+					document.getElementById("login-alert").removeAttribute("hidden");
 				}
 			};
 			xhttp.open("POST", "/api/login", true);
 			xhttp.setRequestHeader("Content-Type", "application/json");
-			xhttp.send(JSON.stringify({email, password}));
+			xhttp.send(JSON.stringify({
+				email,
+				password
+			}));
 			return false;
 		}
 	</script>

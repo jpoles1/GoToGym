@@ -8,7 +8,7 @@ body {
   border-radius: 4px;
   color: #a94442;
   background-color: #f5c0c0;
-  border-color: #eb798c;
+  border: .5px solid #eb798c;
 }
 
 input[type="text"],

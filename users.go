@@ -42,16 +42,31 @@ func findUserDocumentByEmail(email string) int {
 }
 
 func findUserDocumentByAPIKey(apiKey string) (*UserDocument, error) {
-	var err error
 	mongoSesh := dbLoad()
 	defer mongoSesh.Close()
 	searchParams := bson.M{
 		"apikey": apiKey,
 	}
 	var userData UserDocument
-	mongoSesh.DB("gotogym").C("users").Find(searchParams).One(&userData)
-	if userData.ID == bson.ObjectId("") {
-		err = errors.New("Could not fetch a user with this API key")
+	err := mongoSesh.DB("gotogym").C("users").Find(searchParams).One(&userData)
+	return &userData, err
+}
+func checkUserCredentials(email string, passwordString string) (*UserDocument, error) {
+	mongoSesh := dbLoad()
+	defer mongoSesh.Close()
+	searchParams := bson.M{
+		"email": email,
+	}
+	var userData UserDocument
+	err := mongoSesh.DB("gotogym").C("users").Find(searchParams).One(&userData)
+	if err != nil {
+		err = errors.New("Invalid credentials")
+		return &userData, err
+	}
+	err = bcrypt.CompareHashAndPassword(userData.PasswordHash, []byte(passwordString))
+	if err != nil {
+		err = errors.New("Invalid credentials")
+		return &userData, err
 	}
 	return &userData, err
 }

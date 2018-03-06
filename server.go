@@ -15,10 +15,12 @@ func validateTemplates() {
 
 func initRouter() *mux.Router {
 	router := mux.NewRouter()
-	//Define Routes
+	//Define Web Routes
 	router.HandleFunc("/", homePageHandler)
 	router.HandleFunc("/login", loginHandler)
 	router.HandleFunc("/visitlist/{apiKey}", visitListHandler)
+	//Define API Routes
+	router.HandleFunc("/api/login", apiHandlers["login"]).Methods("POST")
 	router.HandleFunc("/api/visitlist/{apiKey}", apiHandlers["visitlist"]).Methods("GET")
 	router.HandleFunc("/api/gymvisit", apiHandlers["gymvisit"]).Methods("POST")
 	router.HandleFunc("/api/newuser", apiHandlers["newuser"]).Methods("POST")

@@ -14,6 +14,24 @@ var apiHandlers = apiHandlerSetup()
 func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 	var apiHandlers = map[string]func(http.ResponseWriter, *http.Request){}
 	//Use this endpoint to get a list of gym visits from a given user's account
+	apiHandlers["login"] = func(w http.ResponseWriter, r *http.Request) {
+		type apiStruct struct {
+			Email             string `json:"email"`
+			PlaintextPassword string `json:"password"`
+		}
+		decoder := json.NewDecoder(r.Body)
+		var apiData apiStruct
+		err := decoder.Decode(&apiData)
+		errCheck("Decoding login API request", err)
+		defer r.Body.Close()
+		userData, err := checkUserCredentials(apiData.Email, apiData.PlaintextPassword)
+		if err != nil {
+			w.Write([]byte(""))
+			return
+		}
+		w.Write([]byte(userData.APIKey))
+	}
+	//Use this endpoint to get a list of gym visits from a given user's account
 	apiHandlers["visitlist"] = func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		apiKey := vars["apiKey"]
