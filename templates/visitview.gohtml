@@ -1,12 +1,10 @@
 <html>
 
 <head>
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/c3@0.4.21/c3.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link rel="stylesheet" href="/static/main.css">
     <style>
-        body{
-            font-family: 'Roboto', sans-serif;
-        }
         #plot-container {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
@@ -20,11 +18,15 @@
             text-align: center;
             vertical-align: middle;
         }
-        
-        .plot-title{
-            padding: 5px;
-            border-bottom: 1px solid #d7d7d7; 
+
+        .plot-title {
+            padding: 10px 15px;
+            border-bottom: 1px solid #d7d7d7;
             font-weight: bold;
+        }
+
+        .plot-box {
+            height: 100%
         }
 
         #attendance-pct-gauge {
@@ -33,11 +35,19 @@
 
         #attendance-plot {
             grid-column: span 6;
-            grid-row: span 2;
+            grid-row: span 1;
         }
 
         #monthly-missed-gauge {
             grid-column: span 3;
+        }
+
+        #attended-dow-pie-chart {
+            grid-column: span 6;
+        }
+
+        #missed-dow-pie-chart {
+            grid-column: span 6;
         }
     </style>
     <script src="//cdn.jsdelivr.net/d3js/3.5.17/d3.min.js" charset="utf-8"></script>
@@ -49,34 +59,53 @@
         <div id="plot-container">
             <div id="attendance-pct-gauge" class="plot-container">
                 <div class="plot-title">
-                    Attendance Frequency 
+                    How frequently do I go to my scheduled workouts?
                 </div>
-                <div class="plot-box">
-
-                </div>
+                <div class="plot-box"></div>
             </div>
             <div id="attendance-plot" class="plot-container">
                 <div class="plot-title">
-                    Attendance Timeseries
+                    How many workouts have I completed so far?
                 </div>
-                <div class="plot-box">
-
-                </div>
+                <div class="plot-box"></div>
             </div>
             <div id="monthly-missed-gauge" class="plot-container">
-                Monthly Missed
+                <div class="plot-title">
+                    How many workouts have I missed this month?
+                </div>
+                <div class="plot-box"></div>
             </div>
-            <div id="attendance-pct-gauge" class="plot-container">
-                DoW Pie Chart
+            <div id="attended-dow-pie-chart" class="plot-container">
+                <div class="plot-title">
+                    What day of the week do I go to the gym?
+                </div>
+                <div class="plot-box"></div>
             </div>
-            <div id="attendance-pct-gauge" class="plot-container">
-                Attendance Pct Gauge
+            <div id="missed-dow-pie-chart" class="plot-container">
+                <div class="plot-title">
+                    What day of the week do I miss going to the gym?
+                </div>
+                <div class="plot-box"></div>
             </div>
         </div>
     </div>
     <script src="/static/charts.js" type="text/javascript"></script>
     <script type="text/javascript">
-        var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        var dateFormat = d3.time.format("%B %-d, %Y at %-I:%M%p");
+        var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',
+            'November', 'December'
+        ];
+        var dayOfWeekAttendedCounts = {
+            "Monday": 0,
+            "Tuesday": 0,
+            "Wednesday": 0,
+            "Thursday": 0,
+            "Friday": 0,
+            "Saturday": 0,
+            "Sunday": 0
+        }
+        var dayOfWeekMissedCounts = Object.assign({}, dayOfWeekAttendedCounts);
+        var daysOfWeek = Object.keys(dayOfWeekAttendedCounts)
         var now = new Date();
         var thisMonth = months[now.getMonth()];
         var xhttp = new XMLHttpRequest();
@@ -86,20 +115,35 @@
                 totalCount = visitData.length
                 attendedCount = 0
                 missedThisMonth = 0
+                totalThisMonth = 0
                 attendancePlotTimepoints = ["Time"]
-                attendancePlotCounts = ["Attendance"] 
+                attendancePlotCounts = ["Cumulative Attendance"]
                 console.log(visitData)
                 for (visitIndex in visitData) {
                     visit = visitData[visitIndex]
-                    if(visit.attendance == 1){
+                    visitMonth = visit.endTime.split(" ")[0]
+                    timestamp = dateFormat.parse(visit.endTime)
+                    dow = daysOfWeek[timestamp.getDay()]
+                    if (visit.attendance == 1) {
                         attendedCount++
+                        dayOfWeekAttendedCounts[dow]++
+                    } else {
+                        dayOfWeekMissedCounts[dow]++
+                    }
+                    if (thisMonth == visitMonth) {
+                        totalThisMonth++
+                        if (visit.attendance != 1) {
+                            missedThisMonth++
+                        }
                     }
                     attendancePlotTimepoints.push(visit.endTime)
                     attendancePlotCounts.push(attendedCount)
                 }
-                generateGauge("#attendance-pct-gauge .plot-box", 100*attendedCount/totalCount);
-                generateAttendancePlot("#attendance-plot .plot-box", [attendancePlotTimepoints, attendancePlotCounts])
-                document.getElementById("monthly-missed-gauge").innerHTML = this.responseText;
+                generateGauge("#attendance-pct-gauge", 100 * attendedCount / totalCount);
+                generateMonthlyMissedGauge("#monthly-missed-gauge", missedThisMonth, totalThisMonth)
+                generateDayOfWeekPlot("#attended-dow-pie-chart", dayOfWeekAttendedCounts)
+                generateDayOfWeekPlot("#missed-dow-pie-chart", dayOfWeekMissedCounts)
+                generateAttendancePlot("#attendance-plot", [attendancePlotTimepoints, attendancePlotCounts])
             }
         };
         xhttp.open("GET", "/api/visitlist/{{.APIKey}}", true);
