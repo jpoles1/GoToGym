@@ -142,6 +142,9 @@
             }
             else{ 
                 document.getElementById("container").innerHTML = "<h2>Error: " + this.responseText + "</h2>"
+                setTimeout(function(){
+                    window.location = "/"
+                }, 1500)
             }
         };
         xhttp.open("GET", "/api/visitlist/{{.APIKey}}", true);
