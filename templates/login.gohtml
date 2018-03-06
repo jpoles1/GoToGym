@@ -1,0 +1,52 @@
+<html>
+
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+	<link rel="stylesheet" href="/static/main.css">
+	<link rel="stylesheet" href="/static/gradient-button.css">
+	<script src="/static/gradient-button.js"></script>
+</head>
+
+<body>
+	<center>
+		<div style="background-color: #ccc; width: 40%; min-width: 400px; padding: 20px; margin-top: 100px; border-radius: 5px">
+			<h1>Welcome to GoToGym</h1>
+			<hr>
+			<br>
+			<div class="alert-danger" id="login-alert" hidden></div>
+			<form>
+				<input type="text" placeholder="email" id="login-email" autocomplete="current-email">
+				<br>
+				<input type="password" placeholder="password" id="login-password" autocomplete="current-password">
+				<br>
+				<a class="gradient-button-link" onclick="return submitLogin()">
+					<button class="gradient-button">
+						<span style="font-size: 16px;">Login</span>
+					</button>
+				</a>
+			</form>
+		</div>
+	</center>
+	<script>
+		function submitLogin(e) {
+			var email = document.getElementById("login-email").value
+			var password = document.getElementById("login-password").value
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function () {
+				if (this.readyState == 4) {
+					if (this.status == 200) {
+						window.location = this.responseText
+					} else {
+						document.getElementById("login-alert").style.visibility = "visible"
+					}
+				}
+			};
+			xhttp.open("POST", "/api/login", true);
+			xhttp.setRequestHeader("Content-Type", "application/json");
+			xhttp.send(JSON.stringify({email, password}));
+			return false;
+		}
+	</script>
+</body>
+
+</html>

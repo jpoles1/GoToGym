@@ -7,14 +7,14 @@
     -moz-appearance: none;
     appearance: none;
     background: #003a92;
-    padding: 1em 2em;
+    padding: 0.8em 1.5em;
     border: none;
     color: white;
     font-size: 1.2em;
     cursor: pointer;
     outline: none;
     overflow: hidden;
-    border-radius: 100px;
+    border-radius: 5px;
 }
 
 .gradient-button span {

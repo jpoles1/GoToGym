@@ -24,3 +24,8 @@ func visitListHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	t.Execute(w, listViewData)
 }
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	t := template.New("visitlist")
+	t, _ = template.ParseFiles("templates/login.gohtml")
+	t.Execute(w, nil)
+}
