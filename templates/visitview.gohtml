@@ -28,27 +28,22 @@
         .plot-box {
             height: 100%
         }
-
-        #attendance-pct-gauge {
+        .plot-3 {
             grid-column: span 3;
         }
-
-        #attendance-plot {
-            grid-column: span 6;
-            grid-row: span 1;
-        }
-
-        #monthly-missed-gauge {
-            grid-column: span 3;
-        }
-
-        #attended-dow-pie-chart {
+        .plot-6 {
             grid-column: span 6;
         }
-
-        #missed-dow-pie-chart {
-            grid-column: span 6;
+        
+        @media (max-width: 1000px) {
+            #plot-container {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            .plot-3{
+                grid-column: span 6;
+            }
         }
+
     </style>
     <script src="//cdn.jsdelivr.net/d3js/3.5.17/d3.min.js" charset="utf-8"></script>
     <script src="https://cdn.jsdelivr.net/npm/c3@0.4.21/c3.min.js" type="text/javascript"></script>
@@ -57,31 +52,31 @@
 <body>
     <div id="container">
         <div id="plot-container">
-            <div id="attendance-pct-gauge" class="plot-container">
+            <div id="attendance-pct-gauge" class="plot-container plot-3 ">
                 <div class="plot-title">
                     How frequently do I go to my scheduled workouts?
                 </div>
                 <div class="plot-box"></div>
             </div>
-            <div id="attendance-plot" class="plot-container">
+            <div id="attendance-plot" class="plot-container plot-6">
                 <div class="plot-title">
                     How many workouts have I completed so far?
                 </div>
                 <div class="plot-box"></div>
             </div>
-            <div id="monthly-missed-gauge" class="plot-container">
+            <div id="monthly-missed-gauge" class="plot-container plot-3">
                 <div class="plot-title">
                     How many workouts have I missed this month?
                 </div>
                 <div class="plot-box"></div>
             </div>
-            <div id="attended-dow-pie-chart" class="plot-container">
+            <div id="attended-dow-pie-chart" class="plot-container plot-6">
                 <div class="plot-title">
                     What day of the week do I go to the gym?
                 </div>
                 <div class="plot-box"></div>
             </div>
-            <div id="missed-dow-pie-chart" class="plot-container">
+            <div id="missed-dow-pie-chart" class="plot-container plot-6">
                 <div class="plot-title">
                     What day of the week do I miss going to the gym?
                 </div>
