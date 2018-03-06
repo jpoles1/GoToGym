@@ -38,7 +38,7 @@ function generateMonthlyMissedGauge(divID, missedCount, totalCount) {
             }
         },
         color: {
-            pattern: gaugeColorScale.reverse(), // the three color levels for the percentage values.
+            pattern: gaugeColorScale.slice().reverse(), // the three color levels for the percentage values.
             threshold: {
                 values: [30, 60, 90, 100]
             }
