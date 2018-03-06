@@ -28,16 +28,23 @@
 		</div>
 	</center>
 	<script>
+		function showErrorAlert(errorString){
+			document.getElementById("login-alert").innerHTML = errorString
+			document.getElementById("login-alert").removeAttribute("hidden");
+		}
 		function submitLogin(e) {
 			var email = document.getElementById("login-email").value
+			if(email == ""){
+				showErrorAlert("Need email for login!")
+				return false
+			}
 			var password = document.getElementById("login-password").value
 			var xhttp = new XMLHttpRequest();
 			xhttp.onload = function () {
 				if (this.responseText != "") {
 					window.location = "/visitlist/" + this.responseText
 				} else {
-					document.getElementById("login-alert").innerHTML = "Could not login with the given credentials!"
-					document.getElementById("login-alert").removeAttribute("hidden");
+					showErrorAlert("Could not login with the given credentials!")
 				}
 			};
 			xhttp.open("POST", "/api/login", true);
