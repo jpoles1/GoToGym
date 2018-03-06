@@ -28,22 +28,23 @@
         .plot-box {
             height: 100%
         }
+
         .plot-3 {
             grid-column: span 3;
         }
+
         .plot-6 {
             grid-column: span 6;
         }
-        
+
         @media (max-width: 1000px) {
             #plot-container {
                 grid-template-columns: repeat(6, 1fr);
             }
-            .plot-3{
+            .plot-3 {
                 grid-column: span 6;
             }
         }
-
     </style>
     <script src="//cdn.jsdelivr.net/d3js/3.5.17/d3.min.js" charset="utf-8"></script>
     <script src="https://cdn.jsdelivr.net/npm/c3@0.4.21/c3.min.js" type="text/javascript"></script>
@@ -105,46 +106,47 @@
         var thisMonth = months[now.getMonth()];
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                visitData = JSON.parse(this.responseText)
-                totalCount = visitData.length
-                attendedCount = 0
-                missedThisMonth = 0
-                totalThisMonth = 0
-                attendancePlotTimepoints = ["Time"]
-                attendancePlotCounts = ["Cumulative Attendance"]
-                console.log(visitData)
-                for (visitIndex in visitData) {
-                    visit = visitData[visitIndex]
-                    visitMonth = visit.endTime.split(" ")[0]
-                    timestamp = dateFormat.parse(visit.endTime)
-                    dow = daysOfWeek[timestamp.getDay()]
-                    if (visit.attendance == 1) {
-                        attendedCount++
-                        dayOfWeekAttendedCounts[dow]++
-                    } else {
-                        dayOfWeekMissedCounts[dow]++
-                    }
-                    if (thisMonth == visitMonth) {
-                        totalThisMonth++
-                        if (visit.attendance != 1) {
-                            missedThisMonth++
+            if (this.readyState == 4) {
+                if (this.status == 200) {
+                    visitData = JSON.parse(this.responseText)
+                    totalCount = visitData.length
+                    attendedCount = 0
+                    missedThisMonth = 0
+                    totalThisMonth = 0
+                    attendancePlotTimepoints = ["Time"]
+                    attendancePlotCounts = ["Cumulative Attendance"]
+                    console.log(visitData)
+                    for (visitIndex in visitData) {
+                        visit = visitData[visitIndex]
+                        visitMonth = visit.endTime.split(" ")[0]
+                        timestamp = dateFormat.parse(visit.endTime)
+                        dow = daysOfWeek[timestamp.getDay()]
+                        if (visit.attendance == 1) {
+                            attendedCount++
+                            dayOfWeekAttendedCounts[dow]++
+                        } else {
+                            dayOfWeekMissedCounts[dow]++
                         }
+                        if (thisMonth == visitMonth) {
+                            totalThisMonth++
+                            if (visit.attendance != 1) {
+                                missedThisMonth++
+                            }
+                        }
+                        attendancePlotTimepoints.push(visit.endTime)
+                        attendancePlotCounts.push(attendedCount)
                     }
-                    attendancePlotTimepoints.push(visit.endTime)
-                    attendancePlotCounts.push(attendedCount)
+                    generateGauge("#attendance-pct-gauge", 100 * attendedCount / totalCount);
+                    generateMonthlyMissedGauge("#monthly-missed-gauge", missedThisMonth, totalThisMonth)
+                    generateDayOfWeekPlot("#attended-dow-pie-chart", dayOfWeekAttendedCounts)
+                    generateDayOfWeekPlot("#missed-dow-pie-chart", dayOfWeekMissedCounts)
+                    generateAttendancePlot("#attendance-plot", [attendancePlotTimepoints, attendancePlotCounts])
+                } else {
+                    document.getElementById("container").innerHTML = "<h2>Error: " + this.responseText + "</h2>"
+                    setTimeout(function () {
+                        window.location = "/"
+                    }, 1500)
                 }
-                generateGauge("#attendance-pct-gauge", 100 * attendedCount / totalCount);
-                generateMonthlyMissedGauge("#monthly-missed-gauge", missedThisMonth, totalThisMonth)
-                generateDayOfWeekPlot("#attended-dow-pie-chart", dayOfWeekAttendedCounts)
-                generateDayOfWeekPlot("#missed-dow-pie-chart", dayOfWeekMissedCounts)
-                generateAttendancePlot("#attendance-plot", [attendancePlotTimepoints, attendancePlotCounts])
-            }
-            else{ 
-                document.getElementById("container").innerHTML = "<h2>Error: " + this.responseText + "</h2>"
-                setTimeout(function(){
-                    window.location = "/"
-                }, 1500)
             }
         };
         xhttp.open("GET", "/api/visitlist/{{.APIKey}}", true);
