@@ -109,40 +109,45 @@
             if (this.readyState == 4) {
                 if (this.status == 200) {
                     visitData = JSON.parse(this.responseText)
-                    totalCount = visitData.length
-                    attendedCount = 0
-                    missedThisMonth = 0
-                    totalThisMonth = 0
-                    attendancePlotTimepoints = ["Time"]
-                    attendancePlotCounts = ["Cumulative Attendance"]
-                    console.log(visitData)
-                    for (visitIndex in visitData) {
-                        visit = visitData[visitIndex]
-                        visitMonth = visit.endTime.split(" ")[0]
-                        timestamp = dateFormat.parse(visit.endTime)
-                        dow = daysOfWeek[timestamp.getDay()]
-                        if (visit.attendance == 1) {
-                            attendedCount++
-                            dayOfWeekAttendedCounts[dow]++
-                        } else {
-                            dayOfWeekMissedCounts[dow]++
-                        }
-                        if (thisMonth == visitMonth) {
-                            totalThisMonth++
-                            if (visit.attendance != 1) {
-                                missedThisMonth++
+                    if (visitData && visitData.length > 0) {
+                        totalCount = visitData.length
+                        attendedCount = 0
+                        missedThisMonth = 0
+                        totalThisMonth = 0
+                        attendancePlotTimepoints = ["Time"]
+                        attendancePlotCounts = ["Cumulative Attendance"]
+                        console.log(visitData)
+                        for (visitIndex in visitData) {
+                            visit = visitData[visitIndex]
+                            visitMonth = visit.endTime.split(" ")[0]
+                            timestamp = dateFormat.parse(visit.endTime)
+                            dow = daysOfWeek[timestamp.getDay()]
+                            if (visit.attendance == 1) {
+                                attendedCount++
+                                dayOfWeekAttendedCounts[dow]++
+                            } else {
+                                dayOfWeekMissedCounts[dow]++
                             }
+                            if (thisMonth == visitMonth) {
+                                totalThisMonth++
+                                if (visit.attendance != 1) {
+                                    missedThisMonth++
+                                }
+                            }
+                            attendancePlotTimepoints.push(visit.endTime)
+                            attendancePlotCounts.push(attendedCount)
                         }
-                        attendancePlotTimepoints.push(visit.endTime)
-                        attendancePlotCounts.push(attendedCount)
+                        generateGauge("#attendance-pct-gauge", 100 * attendedCount / totalCount);
+                        generateMonthlyMissedGauge("#monthly-missed-gauge", missedThisMonth, totalThisMonth)
+                        generateDayOfWeekPlot("#attended-dow-pie-chart", dayOfWeekAttendedCounts)
+                        generateDayOfWeekPlot("#missed-dow-pie-chart", dayOfWeekMissedCounts)
+                        generateAttendancePlot("#attendance-plot", [attendancePlotTimepoints, attendancePlotCounts])
+                    } else {
+                        alert("No data available yet, time to hit the gym!")
                     }
-                    generateGauge("#attendance-pct-gauge", 100 * attendedCount / totalCount);
-                    generateMonthlyMissedGauge("#monthly-missed-gauge", missedThisMonth, totalThisMonth)
-                    generateDayOfWeekPlot("#attended-dow-pie-chart", dayOfWeekAttendedCounts)
-                    generateDayOfWeekPlot("#missed-dow-pie-chart", dayOfWeekMissedCounts)
-                    generateAttendancePlot("#attendance-plot", [attendancePlotTimepoints, attendancePlotCounts])
                 } else {
-                    document.getElementById("container").innerHTML = "<h2>Error: " + this.responseText + "</h2>"
+                    document.getElementById("container").innerHTML = "<h2>Error: " + this.responseText +
+                        "</h2>"
                     setTimeout(function () {
                         window.location = "/"
                     }, 1500)
