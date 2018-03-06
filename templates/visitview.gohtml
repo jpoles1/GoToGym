@@ -140,6 +140,9 @@
                 generateDayOfWeekPlot("#missed-dow-pie-chart", dayOfWeekMissedCounts)
                 generateAttendancePlot("#attendance-plot", [attendancePlotTimepoints, attendancePlotCounts])
             }
+            else{ 
+                document.getElementById("container").innerHTML = "<h2>Error: " + this.responseText + "</h2>"
+            }
         };
         xhttp.open("GET", "/api/visitlist/{{.APIKey}}", true);
         xhttp.send();
