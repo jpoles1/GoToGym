@@ -119,7 +119,7 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		gymVisitData, err := findGymVisitDocumentByID(bson.ObjectIdHex(documentID))
 		if err != nil {
 			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("Document not found:" + err.Error()))
+			w.Write([]byte("Document not found: " + err.Error()))
 			return
 		}
 		userData, err := findUserDocumentByAPIKey(apiKey)
