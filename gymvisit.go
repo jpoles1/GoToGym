@@ -20,7 +20,7 @@ const (
 
 //GymVisitDocument is a stucture to contain an entry in the GymVisit mgo collection
 type GymVisitDocument struct {
-	ID          bson.ObjectId `json:"id" bson:"_id,omitempty"`
+	ID          bson.ObjectId `json:"-" bson:"_id,omitempty"`
 	UserID      bson.ObjectId `json:"-" bson:"userid"`
 	Title       string        `json:"title"`
 	Description string        `json:"desc"`
