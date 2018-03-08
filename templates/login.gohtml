@@ -42,7 +42,7 @@
 			var xhttp = new XMLHttpRequest();
 			xhttp.onload = function () {
 				if (this.responseText != "") {
-					window.location = "/visitlist/" + this.responseText
+					window.location = "/visitview/" + this.responseText
 				} else {
 					showErrorAlert("Could not login with the given credentials!")
 				}

@@ -76,11 +76,11 @@ func errCheck(taskDescription string, err error) {
 	}
 }
 
-func sendAlert(email bool, subject string, alertText string) {
+func sendAlert(doEmail bool, subject string, alertText string) {
 	color.Red("High Importance Alert:")
 	log.Println(alertText)
 	//TODO add an email alert for high importance alerts (like network failures)
-	if email {
+	if doEmail {
 		err := sendEmail(envSMTPSender, "Alert:"+subject, "Alert:<br>"+alertText)
 		errCheck("Sending alert email", err)
 	}

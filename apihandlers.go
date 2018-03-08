@@ -174,8 +174,8 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 			}
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.Write([]byte(`
-				<meta http-equiv="refresh" content="1.5;url=/visitlist/` + apiKey + `"/>
-				Successfully updated visit attendance! <a href="/visitlist/` + apiKey + `">Redirecting...</a>
+				<meta http-equiv="refresh" content="1.5;url=/visitview/` + apiKey + `"/>
+				Successfully updated visit attendance! <a href="/visitview/` + apiKey + `">Redirecting...</a>
 			`))
 		}
 	}

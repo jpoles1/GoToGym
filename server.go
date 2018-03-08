@@ -19,7 +19,7 @@ func initRouter() *mux.Router {
 	router.HandleFunc("/", homePageHandler)
 	router.HandleFunc("/login", loginPageHandler)
 	router.HandleFunc("/registration", registrationPageHandler)
-	router.HandleFunc("/visitlist/{apiKey}", visitListHandler)
+	router.HandleFunc("/visitview/{apiKey}", visitViewHandler)
 	//Define API Routes
 	router.HandleFunc("/api/login", apiHandlers["login"]).Methods("POST")
 	router.HandleFunc("/api/registration", apiHandlers["registration"]).Methods("POST")

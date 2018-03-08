@@ -12,6 +12,9 @@ import (
 
 var testRouter = initRouter()
 
+func TestValidateTemplates(t *testing.T) {
+	validateTemplates()
+}
 func TestGymVisitHandler(t *testing.T) {
 	userID := bson.NewObjectId()
 	apiKey := "secret"
@@ -49,6 +52,14 @@ func TestGymVisitHandler(t *testing.T) {
 		testRouter.ServeHTTP(response, request)
 		if response.Code != 200 {
 			t.Error("Failed to submit to verifyvisit endpoint. Err code:", response.Code, response.Body)
+		}
+	})
+	t.Run("Login to account", func(t *testing.T) {
+		request, _ := http.NewRequest("POST", "/api/login", strings.NewReader("{\"email\": \"jpdev.noreply@gmail.com\", \"password\": \"password\"}"))
+		response := httptest.NewRecorder()
+		testRouter.ServeHTTP(response, request)
+		if response.Code != 200 {
+			t.Error("Failed to submit to registration endpoint. Err code:", response.Code, response.Body)
 		}
 	})
 	t.Run("Fetch visit list", func(t *testing.T) {
