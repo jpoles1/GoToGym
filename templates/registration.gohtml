@@ -1,0 +1,90 @@
+<html>
+
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+	<link rel="stylesheet" href="/static/main.css">
+	<link rel="stylesheet" href="/static/gradient-button.css">
+	<script src="/static/gradient-button.js"></script>
+</head>
+
+<body>
+	<center>
+		<div style="background-color: #ccc; width: 40%; min-width: 400px; padding: 20px; margin-top: 100px; border-radius: 5px">
+			<h1>Welcome to GoToGym</h1>
+			<hr>
+			<br>
+			<div class="alert-danger" id="registration-alert" hidden></div>
+			<form>
+				<input type="text" placeholder="Email" id="registration-email" autocomplete="email">
+				<input type="text" placeholder="First name" id="registration-first-name" autocomplete="given-name">
+				<input type="text" placeholder="Last name" id="registration-last-name" autocomplete="family-name">
+				<input type="password" placeholder="Password" id="registration-password">
+				<br>
+				<a class="gradient-button-link" onclick="return submitRegistration()">
+					<button class="gradient-button">
+						<span style="font-size: 16px;">Register</span>
+					</button>
+				</a>
+			</form>
+		</div>
+	</center>
+	<script>
+		function stringStrip(str){
+			return str.replace(/(^\s+|\s+$)/g,'');
+		}
+		function checkEmail(email) {
+			var reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+			if (!reg.test(email)) return false;
+			return true;
+		}
+		function showErrorAlert(errorString){
+			document.getElementById("registration-alert").innerHTML = errorString
+			document.getElementById("registration-alert").removeAttribute("hidden");
+		}
+		function submitRegistration(e) {
+			var email = document.getElementById("registration-email").value
+			email = stringStrip(email)
+			if(!checkEmail(email)){
+				showErrorAlert("Invalid email!")
+				return false
+			}
+			var firstName = document.getElementById("registration-first-name").value
+			firstName = stringStrip(firstName)
+			if(firstName == ""){
+				showErrorAlert("Empty First Name Forbidden!")
+				return false
+			}
+			var lastName = document.getElementById("registration-last-name").value
+			lastName = stringStrip(lastName)
+			if(lastName == ""){
+				showErrorAlert("Empty Last Name Forbidden!")
+				return false
+			}
+			var password = document.getElementById("registration-last-name").value
+			password = stringStrip(password)
+			if(password == ""){
+				showErrorAlert("Empty Password Forbidden!")
+				return false
+			}
+			var xhttp = new XMLHttpRequest();
+			xhttp.onload = function () {
+				if(this.status != 200){
+					showErrorAlert(this.responseText+"!")
+					return false
+				}
+				window.location = "/visitlist/" + this.responseText
+			};
+			xhttp.open("POST", "/api/registration", true);
+			xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+			xhttp.send(JSON.stringify({
+				email,
+				firstName,
+				lastName,
+				password
+			}));
+			return false;
+		}
+	</script>
+</body>
+
+</html>

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
 
 	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/mux"
@@ -88,11 +89,15 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		w.Write([]byte("Gym Visit Entry Received"))
 	}
 	//Use this endpoint to add a new user account
-	apiHandlers["newuser"] = func(w http.ResponseWriter, r *http.Request) {
+	apiHandlers["registration"] = func(w http.ResponseWriter, r *http.Request) {
+		validateEmail := func(email string) bool {
+			Re := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+			return Re.MatchString(email)
+		}
 		type apiStruct struct {
 			Email     string `json:"email"`
-			FirstName string `json:"firstname"`
-			LastName  string `json:"lastname"`
+			FirstName string `json:"firstName"`
+			LastName  string `json:"lastName"`
 			Password  string `json:"password"`
 		}
 		decoder := json.NewDecoder(r.Body)
@@ -102,13 +107,18 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		defer r.Body.Close()
 		if apiData.Email == "" || apiData.FirstName == "" || apiData.LastName == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Need to fill all fields (email, firstname, lastname)"))
+			w.Write([]byte("Need to fill all fields"))
+			return
+		}
+		if !validateEmail(apiData.Email) {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("Invalid email address."))
 			return
 		}
 		userCount := findUserDocumentByEmail(apiData.Email)
 		if userCount > 0 {
 			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("Email already in use"))
+			w.Write([]byte("Email in use"))
 			return
 		}
 		apiKey := uuid.NewV4().String()
@@ -126,7 +136,7 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 			return
 		}
 		createUserDocument(newUserData, apiData.Password)
-		w.Write([]byte("New User Entry Received"))
+		w.Write([]byte(newUserData.APIKey))
 	}
 	//Use this endpoint to update a gym visit with user attendance
 	apiHandlers["verifyvisit"] = func(w http.ResponseWriter, r *http.Request) {

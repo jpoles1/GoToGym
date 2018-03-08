@@ -67,17 +67,17 @@ func TestGymVisitHandler(t *testing.T) {
 
 func TestUserRegistration(t *testing.T) {
 	t.Run("Create User Via API", func(t *testing.T) {
-		request, _ := http.NewRequest("POST", "/api/newuser", strings.NewReader("{\"email\": \"jpdev.noreply@gmail.com\", \"firstname\": \"Jordan\", \"lastname\": \"Poles\"}"))
+		request, _ := http.NewRequest("POST", "/api/registration", strings.NewReader("{\"email\": \"jpdev.noreply@gmail.com\", \"firstName\": \"Jordan\", \"lastName\": \"Poles\"}"))
 		response := httptest.NewRecorder()
 		testRouter.ServeHTTP(response, request)
 		if response.Code != 200 {
-			t.Error("Failed to submit to newuser endpoint. Err code:", response.Code, response.Body)
+			t.Error("Failed to submit to registration endpoint. Err code:", response.Code, response.Body)
 		}
 	})
 	t.Run("Delete All Users", func(t *testing.T) {
 		deleteAllUserDocuments()
 	})
 	t.Run("Delete All GymVisits", func(t *testing.T) {
-		//deleteAllGymVisitDocuments()
+		deleteAllGymVisitDocuments()
 	})
 }

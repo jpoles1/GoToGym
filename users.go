@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 
+	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -25,7 +26,14 @@ func createUserDocument(userDoc UserDocument, passString string) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(passString), bcrypt.DefaultCost)
 	errCheck("Encoding password to hash", err)
 	userDoc.PasswordHash = passwordHash
-	err = mongoSesh.DB("gotogym").C("users").Insert(userDoc)
+	index := mgo.Index{
+		Key:    []string{"email"},
+		Unique: true,
+	}
+	collection := mongoSesh.DB("gotogym").C("users")
+	err = collection.EnsureIndex(index)
+	errCheck("Ensuring unique email", err)
+	err = collection.Insert(userDoc)
 	errCheck("Inserting user into DB", err)
 }
 
