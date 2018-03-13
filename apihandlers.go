@@ -76,7 +76,7 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		}
 		currentTime := ""
 		if apiData.StartTime == "" {
-			currentTime = time.Now().Format("March 13, 2018 at 04:00PM")
+			currentTime = time.Now().Format("January 2, 2006 at 03:04PM")
 			apiData.StartTime = currentTime
 		}
 		if apiData.EndTime == "" {
