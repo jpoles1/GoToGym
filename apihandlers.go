@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"regexp"
+	"time"
 
 	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/mux"
@@ -72,6 +73,14 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write([]byte("API key not found"))
 			return
+		}
+		currentTime := ""
+		if apiData.StartTime == "" {
+			currentTime = time.Now().Format("March 13, 2018 at 04:00PM")
+			apiData.StartTime = currentTime
+		}
+		if apiData.EndTime == "" {
+			apiData.EndTime = currentTime
 		}
 		visitData := GymVisitDocument{
 			bson.NewObjectId(),
