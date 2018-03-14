@@ -74,19 +74,21 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 			w.Write([]byte("API key not found"))
 			return
 		}
-		loc, locErr := time.LoadLocation("America/New_York")
-		var currentTime string
-		if locErr != nil {
-			errCheck("Setting timezone", locErr)
-			currentTime = time.Now().Format("January 2, 2006 at 03:04PM")
-		} else {
-			currentTime = time.Now().In(loc).Format("January 2, 2006 at 03:04PM")
-		}
-		if apiData.StartTime == "" {
-			apiData.StartTime = currentTime
-		}
-		if apiData.EndTime == "" {
-			apiData.EndTime = currentTime
+		if apiData.StartTime == "" || apiData.EndTime == "" {
+			loc, locErr := time.LoadLocation("America/New_York")
+			var currentTime string
+			if locErr != nil {
+				errCheck("Setting timezone", locErr)
+				currentTime = time.Now().Format("January 2, 2006 at 03:04PM")
+			} else {
+				currentTime = time.Now().In(loc).Format("January 2, 2006 at 03:04PM")
+			}
+			if apiData.StartTime == "" {
+				apiData.StartTime = currentTime
+			}
+			if apiData.EndTime == "" {
+				apiData.EndTime = currentTime
+			}
 		}
 		visitData := GymVisitDocument{
 			bson.NewObjectId(),
