@@ -85,11 +85,7 @@ func TestUserRegistration(t *testing.T) {
 		response := httptest.NewRecorder()
 		testRouter.ServeHTTP(response, request)
 		if response.Code != 200 {
-			if response.Code == 500 {
-				t.Log("Error sending email, but not fatal for testing purposes.")
-			} else {
-				t.Error("Failed to submit to registration endpoint. Err code:", response.Code, response.Body)
-			}
+			t.Error("Failed to submit to registration endpoint. Err code:", response.Code, response.Body)
 		}
 	})
 	t.Run("Login to account", func(t *testing.T) {
@@ -108,11 +104,7 @@ func TestUserRegistration(t *testing.T) {
 		response := httptest.NewRecorder()
 		testRouter.ServeHTTP(response, request)
 		if response.Code != 200 {
-			if response.Code == 500 {
-				t.Log("Error sending email, but not fatal for testing purposes.")
-			} else {
-				t.Error("Failed to submit to registration endpoint. Err code:", response.Code, response.Body)
-			}
+			t.Error("Failed to submit to registration endpoint. Err code:", response.Code, response.Body)
 		}
 	})
 	t.Run("Login to Second Account", func(t *testing.T) {
