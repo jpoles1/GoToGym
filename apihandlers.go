@@ -147,10 +147,15 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 			false, []byte{},
 		}
 		err = sendRegistrationEmail(&newUserData)
+		//TODO Maybe remove later?
+		//For the purposes of testing, don't worry about email send failures
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to send email: " + err.Error()))
-			return
+			if !envProduction {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed to send email: " + err.Error()))
+				return
+			}
+			w.Write([]byte("Failed to send email on non-production run: " + err.Error()))
 		}
 		createUserDocument(newUserData, apiData.Password)
 		w.Write([]byte(newUserData.APIKey))
