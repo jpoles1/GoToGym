@@ -1,10 +1,12 @@
 <html>
 
 <head>
-    <title>GoToGym - Registration</title>
+	<title>GoToGym - Registration</title>
 	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 	<link rel="stylesheet" href="/static/main.css">
 	<link rel="stylesheet" href="/static/gradient-button.css">
+	<script defer src="https://use.fontawesome.com/releases/v5.0.8/js/solid.js" integrity="sha384-+Ga2s7YBbhOD6nie0DzrZpJes+b2K1xkpKxTFFcx59QmVPaSA8c7pycsNaFwUK6l" crossorigin="anonymous"></script>
+	<script defer src="https://use.fontawesome.com/releases/v5.0.8/js/fontawesome.js" integrity="sha384-7ox8Q2yzO/uWircfojVuCQOZl+ZZBg2D2J5nkpLqzH1HY0C1dHlTKIbpRz/LG23c" crossorigin="anonymous"></script>
 	<script src="/static/gradient-button.js"></script>
 </head>
 
@@ -21,68 +23,79 @@
 				<input type="text" placeholder="Last name" id="registration-last-name" autocomplete="family-name">
 				<input type="password" placeholder="Password" id="registration-password">
 				<br>
-				<a class="gradient-button-link" onclick="return submitRegistration()">
+				<a id="registration-submit" class="gradient-button-link" onclick="return submitRegistration()">
 					<button class="gradient-button">
-						<span style="font-size: 16px;">Register</span>
+						<span style="font-size: 16px;" id="registration-submit-text">Register</span>
 					</button>
 				</a>
 			</form>
 		</div>
 	</center>
 	<script>
-		function stringStrip(str){
-			return str.replace(/(^\s+|\s+$)/g,'');
+		var currentlySubmitting = false;
+
+		function stringStrip(str) {
+			return str.replace(/(^\s+|\s+$)/g, '');
 		}
+
 		function checkEmail(email) {
 			var reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
 			if (!reg.test(email)) return false;
 			return true;
 		}
-		function showErrorAlert(errorString){
+
+		function showErrorAlert(errorString) {
+			currentlySubmitting = false
+			document.getElementById("registration-submit-text").innerHTML = "Register"
 			document.getElementById("registration-alert").innerHTML = errorString
 			document.getElementById("registration-alert").removeAttribute("hidden");
 		}
+
 		function submitRegistration(e) {
-			var email = document.getElementById("registration-email").value
-			email = stringStrip(email)
-			if(!checkEmail(email)){
-				showErrorAlert("Invalid email!")
-				return false
-			}
-			var firstName = document.getElementById("registration-first-name").value
-			firstName = stringStrip(firstName)
-			if(firstName == ""){
-				showErrorAlert("Empty First Name Forbidden!")
-				return false
-			}
-			var lastName = document.getElementById("registration-last-name").value
-			lastName = stringStrip(lastName)
-			if(lastName == ""){
-				showErrorAlert("Empty Last Name Forbidden!")
-				return false
-			}
-			var password = document.getElementById("registration-password").value
-			password = stringStrip(password)
-			if(password == ""){
-				showErrorAlert("Empty Password Forbidden!")
-				return false
-			}
-			var xhttp = new XMLHttpRequest();
-			xhttp.onload = function () {
-				if(this.status != 200){
-					showErrorAlert(this.responseText+"!")
+			if (currentlySubmitting == false) {
+				currentlySubmitting = true
+				document.getElementById("registration-submit-text").innerHTML = '<i class="fas fa-spin fa-cog"></i><i class="fas fa-spin fa-cog"></i><i class="fas fa-spin fa-cog"></i>'
+				var email = document.getElementById("registration-email").value
+				email = stringStrip(email)
+				if (!checkEmail(email)) {
+					showErrorAlert("Invalid email!")
 					return false
 				}
-				window.location = "/visitview/" + this.responseText
-			};
-			xhttp.open("POST", "/api/registration", true);
-			xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-			xhttp.send(JSON.stringify({
-				email,
-				firstName,
-				lastName,
-				password
-			}));
+				var firstName = document.getElementById("registration-first-name").value
+				firstName = stringStrip(firstName)
+				if (firstName == "") {
+					showErrorAlert("Empty First Name Forbidden!")
+					return false
+				}
+				var lastName = document.getElementById("registration-last-name").value
+				lastName = stringStrip(lastName)
+				if (lastName == "") {
+					showErrorAlert("Empty Last Name Forbidden!")
+					return false
+				}
+				var password = document.getElementById("registration-password").value
+				password = stringStrip(password)
+				if (password == "") {
+					showErrorAlert("Empty Password Forbidden!")
+					return false
+				}
+				var xhttp = new XMLHttpRequest();
+				xhttp.onload = function () {
+					if (this.status != 200) {
+						showErrorAlert(this.responseText + "!")
+						return false
+					}
+					window.location = "/visitview/" + this.responseText
+				};
+				xhttp.open("POST", "/api/registration", true);
+				xhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+				xhttp.send(JSON.stringify({
+					email,
+					firstName,
+					lastName,
+					password
+				}));
+			}
 			return false;
 		}
 	</script>
