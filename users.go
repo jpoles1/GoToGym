@@ -1,8 +1,6 @@
 package main
 
 import (
-	"errors"
-
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"golang.org/x/crypto/bcrypt"
@@ -19,7 +17,7 @@ type UserDocument struct {
 	PasswordHash   []byte        `json:"-" bson:"hashed_password"`
 }
 
-func createUserDocument(userDoc UserDocument, passString string) {
+func createUserDocument(userDoc UserDocument, passString string) error {
 	mongoSesh := dbLoad()
 	defer mongoSesh.Close()
 	// Hashing the password with the default cost of 10
@@ -35,6 +33,7 @@ func createUserDocument(userDoc UserDocument, passString string) {
 	errCheck("Ensuring unique email", err)
 	err = collection.Insert(userDoc)
 	errCheck("Inserting user into DB", err)
+	return err
 }
 
 func findUserDocumentByEmail(email string) int {
@@ -68,12 +67,12 @@ func checkUserCredentials(email string, passwordString string) (*UserDocument, e
 	var userData UserDocument
 	err := mongoSesh.DB("gotogym").C("users").Find(searchParams).One(&userData)
 	if err != nil {
-		err = errors.New("Invalid credentials")
+		//err = errors.New("Invalid credentials")
 		return &userData, err
 	}
 	err = bcrypt.CompareHashAndPassword(userData.PasswordHash, []byte(passwordString))
 	if err != nil {
-		err = errors.New("Invalid credentials")
+		//err = errors.New("Invalid credentials")
 		return &userData, err
 	}
 	return &userData, err

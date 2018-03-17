@@ -147,6 +147,11 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 			apiData.FirstName, apiData.LastName,
 			false, []byte{},
 		}
+		err = createUserDocument(newUserData, apiData.Password)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to send email: " + err.Error()))
+		}
 		err = sendRegistrationEmail(&newUserData)
 		//TODO Maybe remove later?
 		//For the purposes of testing, don't worry about email send failures
@@ -158,7 +163,6 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 			}
 			log.Println("Failed to send email on non-production run: " + err.Error())
 		}
-		createUserDocument(newUserData, apiData.Password)
 		w.Write([]byte(newUserData.APIKey))
 	}
 	//Use this endpoint to update a gym visit with user attendance
