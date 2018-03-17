@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"regexp"
 	"time"
@@ -150,12 +151,12 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		//TODO Maybe remove later?
 		//For the purposes of testing, don't worry about email send failures
 		if err != nil {
-			if !envProduction {
+			if envProduction {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte("Failed to send email: " + err.Error()))
 				return
 			}
-			w.Write([]byte("Failed to send email on non-production run: " + err.Error()))
+			log.Println("Failed to send email on non-production run: " + err.Error())
 		}
 		createUserDocument(newUserData, apiData.Password)
 		w.Write([]byte(newUserData.APIKey))
