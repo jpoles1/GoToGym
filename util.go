@@ -9,12 +9,22 @@ import (
 	"github.com/subosito/gotenv"
 )
 
+var envProduction bool
 var envBindPort, envBindIP, envBindURL, envMongoURI, envSMTPURI, envSMTPSender, envSMTPPass string
 var envSMPTPPort int
 
 func loadEnv() {
 	//Load Env
 	gotenv.Load()
+
+	//Setup global env variables
+	var err error
+	if os.Getenv("PRODUCTION") == "" {
+		color.Yellow("Missing PRODUCTION value in .env file, automatically setting to false.\nSet a boolean value for PRODUCTION in your .env file to disable this warning.")
+	} else if envProduction, err = strconv.ParseBool(os.Getenv("PRODUCTION")); err != nil {
+		envProduction = false
+		color.Yellow("PRODUCTION value must be a valid bool (true or false)\n Automatically setting to false.")
+	}
 
 	if os.Getenv("BIND_PORT") == "" {
 		log.Fatal("Missing BIND_PORT value in .env file.")
