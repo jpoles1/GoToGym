@@ -15,6 +15,9 @@ var testRouter = initRouter()
 func TestValidateTemplates(t *testing.T) {
 	validateTemplates()
 }
+func TestServeErrorCode(t *testing.T) {
+	serveErrorCode(httptest.NewRecorder(), http.StatusForbidden, "test")
+}
 func TestGymVisitHandler(t *testing.T) {
 	userID := bson.NewObjectId()
 	apiKey := "secret"

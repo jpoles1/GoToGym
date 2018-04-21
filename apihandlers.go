@@ -15,6 +15,11 @@ import (
 
 var apiHandlers = apiHandlerSetup()
 
+func serveErrorCode(w http.ResponseWriter, statusCode int, errorMessage string) {
+	w.WriteHeader(statusCode)
+	w.Write([]byte(errorMessage))
+}
+
 func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 	var apiHandlers = map[string]func(http.ResponseWriter, *http.Request){}
 	//Use this endpoint to get a list of gym visits from a given user's account
@@ -41,8 +46,7 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		apiKey := vars["apiKey"]
 		userDoc, err := findUserDocumentByAPIKey(apiKey)
 		if err != nil {
-			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("API key not found"))
+			serveErrorCode(w, http.StatusForbidden, "API key not found")
 			return
 		}
 		visitDocs := findGymVisitDocumentsByUserID(userDoc.ID)
@@ -66,14 +70,12 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		defer r.Body.Close()
 		//Check that all required fields are filled
 		if apiData.APIKey == "" {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Need to fill all fields (apikey)"))
+			serveErrorCode(w, http.StatusBadRequest, "Need to fill all fields (apikey)")
 			return
 		}
 		userData, err := findUserDocumentByAPIKey(apiData.APIKey)
 		if err != nil {
-			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("API key not found"))
+			serveErrorCode(w, http.StatusForbidden, "API key not found")
 			return
 		}
 		if apiData.StartTime == "" || apiData.EndTime == "" {
@@ -125,13 +127,11 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		errCheck("Decoding newuser API request", err)
 		defer r.Body.Close()
 		if apiData.Email == "" || apiData.FirstName == "" || apiData.LastName == "" {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Need to fill all fields"))
+			serveErrorCode(w, http.StatusBadRequest, "Need to fill all fields")
 			return
 		}
 		if !validateEmail(apiData.Email) {
-			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("Invalid email address."))
+			serveErrorCode(w, http.StatusForbidden, "Invalid email address.")
 			return
 		}
 		userCount := findUserDocumentByEmail(apiData.Email)
@@ -150,16 +150,14 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		}
 		err = createUserDocument(newUserData, apiData.Password)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Failed to send email: " + err.Error()))
+			serveErrorCode(w, http.StatusInternalServerError, "Failed to send email: "+err.Error())
 		}
 		err = sendRegistrationEmail(&newUserData)
 		//TODO Maybe remove later?
 		//For the purposes of testing, don't worry about email send failures
 		if err != nil {
 			if envProduction {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Failed to send email: " + err.Error()))
+				serveErrorCode(w, http.StatusInternalServerError, "Failed to send email: "+err.Error())
 				return
 			}
 			log.Println("Failed to send email on non-production run: " + err.Error())
@@ -174,14 +172,12 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		visitResponse := vars["response"]
 		gymVisitData, err := findGymVisitDocumentByID(bson.ObjectIdHex(documentID))
 		if err != nil {
-			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("Document not found: " + err.Error()))
+			serveErrorCode(w, http.StatusForbidden, "Document not found: "+err.Error())
 			return
 		}
 		userData, err := findUserDocumentByAPIKey(apiKey)
 		if err != nil {
-			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("API key not found"))
+			serveErrorCode(w, http.StatusForbidden, "API key not found")
 			return
 		}
 		if gymVisitData.UserID == userData.ID {
@@ -190,14 +186,12 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 			} else if visitResponse == "no" {
 				gymVisitData.Attendance = AttendanceMissed
 			} else {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte("Invalid response"))
+				serveErrorCode(w, http.StatusBadRequest, "Invalid response")
 				return
 			}
 			err := updateGymVisitDocumentByID(gymVisitData)
 			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Failed to update DB entry: " + err.Error()))
+				serveErrorCode(w, http.StatusInternalServerError, "Failed to update DB entry: "+err.Error())
 				return
 			}
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -214,15 +208,13 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		apiKey := vars["apiKey"]
 		userData, err := findUserDocumentByAPIKey(apiKey)
 		if err != nil || userData.Email != email {
-			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("Invalid credentials."))
+			serveErrorCode(w, http.StatusForbidden, "Invalid credentials.")
 			return
 		}
 		_, err = resetUserPassword(userData.ID, userData.Email)
 		if err != nil {
 			errCheck("Resetting user password", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Could not reset password in DB."))
+			serveErrorCode(w, http.StatusInternalServerError, "Could not reset password in DB.")
 			return
 		}
 		err = sendPasswordResetEmail(userData, requestIP)
@@ -247,14 +239,12 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 		defer r.Body.Close()
 		userData, err := checkUserCredentials(apiData.Email, apiData.OldPassword)
 		if err != nil {
-			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("Incorrect password:" + err.Error()))
+			serveErrorCode(w, http.StatusForbidden, "Incorrect password:"+err.Error())
 			return
 		}
 		err = updateUserPassword(userData.ID, apiData.NewPassword)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Cannot update password in DB."))
+			serveErrorCode(w, http.StatusInternalServerError, "Cannot update password in DB.")
 			return
 		}
 		w.Write([]byte(`
