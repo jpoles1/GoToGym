@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -9,22 +10,32 @@ import (
 	"github.com/subosito/gotenv"
 )
 
-var envProduction bool
+//envUsingMongoAtlas denotes the usage of a MongoDB atlas formatted URI.
+var envProduction, envUsingMongoAtlas bool
 var envBindPort, envBindIP, envBindURL, envMongoURI, envSMTPURI, envSMTPSender, envSMTPPass string
 var envSMPTPPort int
+
+func loadBoolEnv(varName string) bool {
+	if os.Getenv(varName) == "" {
+		color.Yellow(fmt.Sprintf("Missing %s value in .env file, automatically setting to false.\nSet a boolean value for %s in your .env file to disable this warning.", varName, varName))
+		return false
+	}
+	usingMongoAtlas, err := strconv.ParseBool(os.Getenv(varName))
+	if err != nil {
+		color.Yellow(fmt.Sprintf("%s value must be a valid bool (true or false)\n Automatically setting to false.", varName))
+		return false
+	}
+	return usingMongoAtlas
+
+}
 
 func loadEnv() {
 	//Load Env
 	gotenv.Load()
 
 	//Setup global env variables
-	var err error
-	if os.Getenv("PRODUCTION") == "" {
-		color.Yellow("Missing PRODUCTION value in .env file, automatically setting to false.\nSet a boolean value for PRODUCTION in your .env file to disable this warning.")
-	} else if envProduction, err = strconv.ParseBool(os.Getenv("PRODUCTION")); err != nil {
-		envProduction = false
-		color.Yellow("PRODUCTION value must be a valid bool (true or false)\n Automatically setting to false.")
-	}
+	envProduction = loadBoolEnv("PRODUCTION")
+	envUsingMongoAtlas = loadBoolEnv("MONGO_ATLAS")
 
 	if os.Getenv("BIND_PORT") == "" {
 		log.Fatal("Missing BIND_PORT value in .env file.")
