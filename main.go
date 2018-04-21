@@ -15,6 +15,11 @@ func init() {
 	mongoConn = dbLoad()
 }
 func main() {
+	wg := startMicroservices()
+	wg.Wait()
+}
+
+func startMicroservices() sync.WaitGroup {
 	//Add Microservice functions to this list
 	microservices := []func(){
 		func() { webServer() },
@@ -34,9 +39,8 @@ func main() {
 	}
 
 	//wait for all microservices to complete
-	wg.Wait()
+	return wg
 }
-
 func webServer() {
 	validateTemplates()
 	//Spool up http server
