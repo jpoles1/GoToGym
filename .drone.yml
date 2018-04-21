@@ -19,6 +19,7 @@ pipeline:
       SMTP_PORT: "465"
       SMTP_SENDER: $$smtp_sender
       SMTP_PASS: $$smtp_pass
+      SENTRY_DSN: $$sentry_dsn
 services:
   mongo:
     image: mongo
