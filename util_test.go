@@ -14,5 +14,5 @@ func TestErrCheck(t *testing.T) {
 }
 
 func TestSendAlert(t *testing.T) {
-	sendAlert(true, "Testing high importance alerts!", "Testing high importance alerts!")
+	sendAlert(true, "Not so important alert.", "Testing high importance alerts!")
 }

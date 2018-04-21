@@ -11,6 +11,7 @@ import (
 
 func init() {
 	loadEnv()
+	loadSentry()
 	mongoConn = dbLoad()
 }
 func main() {
