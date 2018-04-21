@@ -18,18 +18,20 @@ func TestValidateTemplates(t *testing.T) {
 func TestGymVisitHandler(t *testing.T) {
 	userID := bson.NewObjectId()
 	apiKey := "secret"
+	email := "jpdev.noreply@gmail.com"
+	password := "testpass"
 	gymVisitID := bson.NewObjectId()
 	t.Run("Create User by URL", func(t *testing.T) {
 		createUserDocument(UserDocument{
 			userID,
 			apiKey,
-			"jpdev.noreply@gmail.com",
+			email,
 			"Jordan", "Poles",
 			false, []byte{},
-		}, "password")
+		}, password)
 	})
 	t.Run("Create visit by URL", func(t *testing.T) {
-		request, _ := http.NewRequest("POST", "/api/gymvisit", strings.NewReader("{\"apikey\": \"secret\", \"title\": \"URL Test\", \"desc\": \"Test Description\", \"startTime\": \"March 2, 2018 at 10:00PM\" , \"endTime\": \"March 2, 2018 at 10:08PM\" }}"))
+		request, _ := http.NewRequest("POST", "/api/gymvisit", strings.NewReader("{\"apikey\": \"secret\", \"title\": \"URL Test\", \"desc\": \"Test Description\", \"startTime\": \"\" , \"endTime\": \"\" }}"))
 		response := httptest.NewRecorder()
 		testRouter.ServeHTTP(response, request)
 		if response.Code != 200 {
@@ -55,7 +57,7 @@ func TestGymVisitHandler(t *testing.T) {
 		}
 	})
 	t.Run("Login to account", func(t *testing.T) {
-		request, _ := http.NewRequest("POST", "/api/login", strings.NewReader("{\"email\": \"jpdev.noreply@gmail.com\", \"password\": \"password\"}"))
+		request, _ := http.NewRequest("POST", "/api/login", strings.NewReader("{\"email\": \""+email+"\", \"password\": \""+password+"\"}"))
 		response := httptest.NewRecorder()
 		testRouter.ServeHTTP(response, request)
 		if response.Code != 200 {
@@ -73,6 +75,41 @@ func TestGymVisitHandler(t *testing.T) {
 			t.Error("Failed to fetch from visitlist endpoint. Err code:", response.Code, response.Body)
 		}
 		fmt.Println(response.Body)
+	})
+	t.Run("Reset password", func(t *testing.T) {
+		request, _ := http.NewRequest("POST", "/api/resetpassword/"+email+"/"+apiKey, nil)
+		response := httptest.NewRecorder()
+		testRouter.ServeHTTP(response, request)
+		if response.Code != 200 {
+			t.Error("Failed to reset password. Err code:", response.Code, response.Body)
+		}
+		var err error
+		password, err = resetUserPassword(userID, email)
+		errCheck("Resetting user password during test", err)
+	})
+	t.Run("Update password", func(t *testing.T) {
+		newPassword := "testpass"
+		request, _ := http.NewRequest("POST", "/api/updatepassword", strings.NewReader("{\"email\": \""+email+"\", \"oldPassword\": \""+password+"\", \"newPassword\": \""+newPassword+"\"}"))
+		response := httptest.NewRecorder()
+		testRouter.ServeHTTP(response, request)
+		if response.Code != 200 {
+			t.Error("Failed to update password. Err code:", response.Code, response.Body)
+		}
+		if response.Body.String() == "" {
+			t.Error("Incorrect login credentials!")
+		}
+		password = newPassword
+	})
+	t.Run("Login to account to check update", func(t *testing.T) {
+		request, _ := http.NewRequest("POST", "/api/login", strings.NewReader("{\"email\": \""+email+"\", \"password\": \""+password+"\"}"))
+		response := httptest.NewRecorder()
+		testRouter.ServeHTTP(response, request)
+		if response.Code != 200 {
+			t.Error("Failed to login. Err code:", response.Code, response.Body)
+		}
+		if response.Body.String() == "" {
+			t.Error("Incorrect login credentials!")
+		}
 	})
 	t.Run("Delete User", func(t *testing.T) {
 		deleteUserDocument(userID)

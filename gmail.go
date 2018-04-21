@@ -39,6 +39,20 @@ func sendRegistrationEmail(userData *UserDocument) error {
 	errCheck("Rendering email template", err)
 	return sendEmail(userData.Email, "GoToGym - Registration", tplString.String())
 }
+func sendPasswordResetEmail(userData *UserDocument, requestIP string) error {
+	verificationLink := envBindURL + "/api/verifyemail/" + userData.APIKey
+
+	tmpl := template.New("newuser")
+	tmpl, _ = template.ParseFiles("templates/emailregistration.gohtml")
+	var tplString bytes.Buffer
+	err := tmpl.Execute(&tplString, map[string]string{
+		"FirstName":        userData.FirstName,
+		"APIKey":           userData.APIKey,
+		"VerificationLink": verificationLink,
+	})
+	errCheck("Rendering email template", err)
+	return sendEmail(userData.Email, "GoToGym - Registration", tplString.String())
+}
 func sendGymVisitCheckinEmail(visitData GymVisitDocument, userData *UserDocument) error {
 	verificationLink := envBindURL + "/api/verifyvisit/" + visitData.ID.Hex() + "/" + userData.APIKey
 

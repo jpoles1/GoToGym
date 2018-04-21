@@ -8,7 +8,9 @@ import (
 )
 
 func validateTemplates() {
-	if _, err := template.ParseGlob("templates/*.gohtml"); err != nil {
+	_, err := template.ParseGlob("templates/*.gohtml")
+	errCheck("Parsing template files", err)
+	if err != nil {
 		panic(err)
 	}
 }
@@ -23,6 +25,8 @@ func initRouter() *mux.Router {
 	//Define API Routes
 	router.HandleFunc("/api/login", apiHandlers["login"]).Methods("POST")
 	router.HandleFunc("/api/registration", apiHandlers["registration"]).Methods("POST")
+	router.HandleFunc("/api/resetpassword/{email}/{apiKey}", apiHandlers["resetPassword"]).Methods("POST")
+	router.HandleFunc("/api/updatepassword", apiHandlers["updatePassword"]).Methods("POST")
 	router.HandleFunc("/api/visitlist/{apiKey}", apiHandlers["visitlist"]).Methods("GET")
 	router.HandleFunc("/api/gymvisit", apiHandlers["gymvisit"]).Methods("POST")
 	router.HandleFunc("/api/verifyvisit/{documentID}/{apiKey}/{response}", apiHandlers["verifyvisit"]).Methods("GET")

@@ -35,6 +35,29 @@ func createUserDocument(userDoc UserDocument, passString string) error {
 	errCheck("Inserting user into DB", err)
 	return err
 }
+func resetUserPassword(userID bson.ObjectId, email string) (string, error) {
+	passString := bson.NewObjectId().Hex()
+	err := updateUserPassword(userID, passString)
+	if err != nil {
+		errCheck("Reseting password in user DB entry", err)
+		return "", err
+	}
+	return passString, err
+}
+func updateUserPassword(userID bson.ObjectId, passString string) error {
+	mongoSesh := dbLoad()
+	defer mongoSesh.Close()
+	// Hashing the password with the default cost of 10
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(passString), bcrypt.DefaultCost)
+	errCheck("Encoding password to hash", err)
+	if err != nil {
+		return err
+	}
+	collection := mongoSesh.DB("gotogym").C("users")
+	err = collection.Update(bson.M{"_id": userID}, bson.M{"$set": bson.M{"hashed_password": passwordHash}})
+	errCheck("Updating password in user DB entry", err)
+	return err
+}
 
 func findUserDocumentByEmail(email string) int {
 	var err error

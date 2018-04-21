@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"regexp"
@@ -206,5 +207,61 @@ func apiHandlerSetup() map[string]func(http.ResponseWriter, *http.Request) {
 			`))
 		}
 	}
+	apiHandlers["resetPassword"] = func(w http.ResponseWriter, r *http.Request) {
+		requestIP := r.Header.Get("X-Forwarded-For")
+		vars := mux.Vars(r)
+		email := vars["email"]
+		apiKey := vars["apiKey"]
+		userData, err := findUserDocumentByAPIKey(apiKey)
+		if err != nil || userData.Email != email {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("Invalid credentials."))
+			return
+		}
+		_, err = resetUserPassword(userData.ID, userData.Email)
+		if err != nil {
+			errCheck("Resetting user password", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Could not reset password in DB."))
+			return
+		}
+		err = sendPasswordResetEmail(userData, requestIP)
+		w.Write([]byte(fmt.Sprintf(`
+			Successfully reset your password! Check your email for info on how to update/set your new password.
+			<br>
+			Email: %s
+			<br>
+			IP Address: %s
+		`, email, requestIP)))
+	}
+	apiHandlers["updatePassword"] = func(w http.ResponseWriter, r *http.Request) {
+		type apiStruct struct {
+			Email       string `json:"email"`
+			OldPassword string `json:"oldPassword"`
+			NewPassword string `json:"newPassword"`
+		}
+		decoder := json.NewDecoder(r.Body)
+		var apiData apiStruct
+		err := decoder.Decode(&apiData)
+		errCheck("Decoding updatePassword API request", err)
+		defer r.Body.Close()
+		userData, err := checkUserCredentials(apiData.Email, apiData.OldPassword)
+		if err != nil {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("Incorrect password:" + err.Error()))
+			return
+		}
+		err = updateUserPassword(userData.ID, apiData.NewPassword)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Cannot update password in DB."))
+			return
+		}
+		w.Write([]byte(`
+			<meta http-equiv="refresh" content="1.5;url=/login"/>
+			Successfully updated visit attendance! <a href="/login">Redirecting...</a>
+		`))
+	}
+
 	return apiHandlers
 }
